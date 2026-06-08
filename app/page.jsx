@@ -11,6 +11,8 @@ export default function Home() {
   const [alertMsg, setAlertMsg] = useState('');
   const [reelResult, setReelResult] = useState('Paste an Instagram Reel link to find the product!');
   const [coupons, setCoupons] = useState([]);
+  const [loadingReel, setLoadingReel] = useState(false);
+  const [loadingCoupon, setLoadingCoupon] = useState(false);
 
   const supabase = createClient('https://pvsqvpbjhiwjgifbgmzl.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2c3F2cGJqaGl3amdpZmJnbXpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MTQ4NDIsImV4cCI6MjA5NjM5MDg0Mn0.yPclmBshKqP15iKzIV3mydvxjBI_uruXOZAPQwAuD5s');
 
@@ -22,6 +24,7 @@ export default function Home() {
     loadData();
   }, []);
 
+  // 1. Currency Converter
   const convertCurrency = async (e) => {
     e.preventDefault();
     const amt = e.target.amount.value;
@@ -35,7 +38,7 @@ export default function Home() {
     } catch(e) { setCurrResult("❌ Error fetching rates."); }
   };
 
-  // CLICKABLE DEALS
+  // 2. Clickable Deal Finder
   const findDeals = async (e) => {
     e.preventDefault();
     const product = e.target.product.value;
@@ -47,6 +50,7 @@ export default function Home() {
     ]);
   };
 
+  // 3. EMI Calculator
   const calcEMI = (e) => {
     e.preventDefault();
     const P = parseFloat(e.target.loan.value);
@@ -58,37 +62,59 @@ export default function Home() {
     } else { setEmiResult("Please fill all fields."); }
   };
 
+  // 4. Price Drop Alert
   const setAlert = (e) => {
     e.preventDefault();
     const email = e.target.email.value;
-    if(email) setAlertMsg(`✅ Alert set for ${email}! We will notify you.`);
+    if(email) setAlertMsg(`✅ Alert set for ${email}! PilotBot will notify you.`);
   };
 
+  // 5. REAL INSTAGRAM REEL SCRAPER (APIFY)
   const findReelProduct = async (e) => {
     e.preventDefault();
     const link = e.target.reelLink.value;
-    setReelResult("🤖 AI is analyzing the Reel... Detecting product...");
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    setReelResult(`✅ Product Found in Reel!\n\n📌 Product: "Trendy Wireless Earbuds"\n💰 Best Price: ₹1,299\n\n🛒 Buy on Amazon: https://www.amazon.in/s?k=wireless+earbuds\n🛒 Buy on Flipkart: https://www.flipkart.com/search?q=wireless+earbuds`);
+    setLoadingReel(true);
+    setReelResult("🤖 AI is analyzing the Reel via Apify... Detecting product...");
+    
+    try {
+      const res = await fetch('https://pilotbot-engine.onrender.com/api/reel-product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reelUrl: link })
+      });
+      const data = await res.json();
+      
+      if(data.success) {
+        setReelResult(`✅ Product Found: "${data.productName}"\n\n🛒 Buy on Amazon: ${data.searchLink}\n\n🛒 Buy on Flipkart: ${data.flipkartLink}`);
+      } else {
+        setReelResult("❌ Could not identify the product. Try another Reel link.");
+      }
+    } catch(e) {
+      setReelResult("❌ Server error. Backend might be sleeping or Apify limit reached.");
+    } finally {
+      setLoadingReel(false);
+    }
   };
 
-  // COUPON FETCHER (Apify integration ready)
+  // 6. REAL-TIME COUPON FETCHER (APIFY)
   const fetchCoupons = async (e) => {
     e.preventDefault();
     const store = e.target.store.value;
-    setCoupons([{ code: "LOADING...", discount: "Please wait..." }]);
+    setLoadingCoupon(true);
+    setCoupons([{ code: "LOADING...", discount: "Fetching live data via Apify..." }]);
     
     try {
-      // Call Render Backend which will call Apify
       const res = await fetch(`https://pilotbot-engine.onrender.com/api/coupons?store=${store}`);
       const data = await res.json();
       if(data.coupons && data.coupons.length > 0) {
         setCoupons(data.coupons);
       } else {
-        setCoupons([{ code: "No Coupons", discount: "Try another store or check back later." }]);
+        setCoupons([{ code: "No Coupons", discount: "Try another store" }]);
       }
     } catch(e) {
-      setCoupons([{ code: "Backend Error", discount: "Coupon scraper not connected yet." }]);
+      setCoupons([{ code: "Error", discount: "Backend connection failed" }]);
+    } finally {
+      setLoadingCoupon(false);
     }
   };
 
@@ -101,18 +127,18 @@ export default function Home() {
 
       <main className="min-h-screen bg-gray-50 text-gray-900 font-sans">
         {/* NAVBAR WITH LOGO & PAYPAL */}
-        <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <nav className="bg-white shadow-sm border-b sticky top-0 z-50 bg-opacity-90 backdrop-blur-lg">
           <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-extrabold text-sm shadow-md">AP</div>
               <h1 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">AffiliatePilot</h1>
             </div>
             <div className="hidden md:flex gap-6 text-sm font-medium items-center">
-              <a href="#tools">Tools</a>
-              <a href="#store">Store</a>
-              <a href="/about">About Us</a>
-              <a href="/terms">Legal</a>
-              <a href="/faq">FAQ</a>
+              <a href="#tools" className="hover:text-blue-600 transition">Tools</a>
+              <a href="#store" className="hover:text-blue-600 transition">Store</a>
+              <a href="/about" className="hover:text-blue-600 transition">About Us</a>
+              <a href="/terms" className="hover:text-blue-600 transition">Legal</a>
+              <a href="/faq" className="hover:text-blue-600 transition">FAQ</a>
             </div>
             <a href="https://paypal.me/AbuHamdan978" target="_blank" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm">Go Pro 💎</a>
           </div>
@@ -141,33 +167,37 @@ export default function Home() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             
-            {/* 1. VIRAL: Instagram Reel Product Finder */}
+            {/* 1. VIRAL: Instagram Reel Product Finder (Apify Connected) */}
             <div className="bg-gradient-to-br from-pink-50 to-purple-50 p-6 rounded-3xl shadow-sm border border-pink-100 lg:col-span-2">
               <h3 className="font-bold text-xl mb-2 flex items-center gap-2">🎬 Instagram Reel Product Finder</h3>
-              <p className="text-sm text-gray-500 mb-4">Saw a product in a Reel? Paste the link & find where to buy it cheapest!</p>
+              <p className="text-sm text-gray-500 mb-4">Saw a product in a Reel? Paste the link & our AI will find where to buy it cheapest!</p>
               <form onSubmit={findReelProduct} className="space-y-3">
-                <input name="reelLink" type="url" placeholder="https://www.instagram.com/reel/..." className="w-full border p-3 rounded-xl focus:ring-2 focus:ring-pink-500 outline-none" required />
-                <button type="submit" className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white p-3 rounded-xl font-bold hover:from-pink-600 hover:to-purple-600 transition shadow-md">Find Product</button>
+                <input name="reelLink" type="url" placeholder="https://www.instagram.com/reel/..." className="w-full border p-3 rounded-xl focus:ring-2 focus:ring-pink-500 outline-none bg-white" required />
+                <button type="submit" disabled={loadingReel} className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white p-3 rounded-xl font-bold hover:from-pink-600 hover:to-purple-600 transition shadow-md disabled:opacity-50">
+                  {loadingReel ? "Analyzing Reel..." : "Find Product"}
+                </button>
               </form>
-              <p className="mt-3 text-sm bg-white p-3 rounded-xl whitespace-pre-wrap h-32 overflow-auto border">{reelResult}</p>
+              <p className="mt-3 text-sm bg-white p-3 rounded-xl whitespace-pre-wrap h-40 overflow-auto border shadow-inner">{reelResult}</p>
             </div>
 
             {/* 2. Auto Coupon Finder (Apify Connected) */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border">
               <h3 className="font-bold text-xl mb-2 flex items-center gap-2">🏷️ Real-Time Coupons</h3>
-              <p className="text-sm text-gray-500 mb-4">Fetches live working coupons directly from Amazon/Flipkart.</p>
+              <p className="text-sm text-gray-500 mb-4">Fetches live working coupons directly via Apify.</p>
               <form onSubmit={fetchCoupons} className="space-y-3">
-                <select name="store" className="w-full border p-3 rounded-xl outline-none">
+                <select name="store" className="w-full border p-3 rounded-xl outline-none bg-gray-50">
                   <option value="amazon">Amazon India</option>
                   <option value="flipkart">Flipkart</option>
                 </select>
-                <button type="submit" className="w-full bg-orange-500 text-white p-3 rounded-xl font-bold hover:bg-orange-600 transition shadow-md">Fetch Coupons</button>
+                <button type="submit" disabled={loadingCoupon} className="w-full bg-orange-500 text-white p-3 rounded-xl font-bold hover:bg-orange-600 transition shadow-md disabled:opacity-50">
+                  {loadingCoupon ? "Fetching..." : "Fetch Coupons"}
+                </button>
               </form>
               <div className="mt-3 space-y-2 max-h-32 overflow-auto">
                 {coupons.map((c, i) => (
                   <div key={i} className="bg-orange-50 border border-orange-100 p-2 rounded-lg text-sm flex justify-between">
                     <span className="font-bold text-orange-700">{c.code}</span>
-                    <span className="text-gray-600">{c.discount}</span>
+                    <span className="text-gray-600 text-xs">{c.discount}</span>
                   </div>
                 ))}
               </div>
@@ -180,7 +210,7 @@ export default function Home() {
                 <input name="product" type="text" placeholder="e.g., Sony WH-1000XM5" className="w-full border p-3 rounded-xl outline-none" required />
                 <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-md">Compare Prices</button>
               </form>
-              <div className="mt-3 space-y-2 max-h-32 overflow-auto">
+              <div className="mt-3 space-y-2 max-h-40 overflow-auto">
                 {deals.map((deal, i) => (
                   <a key={i} href={deal.url} target="_blank" rel="noopener noreferrer" className="block bg-blue-50 border border-blue-100 p-2 rounded-lg text-sm text-blue-700 font-medium hover:bg-blue-100 transition">
                     {deal.name} ↗
@@ -215,6 +245,16 @@ export default function Home() {
               {emiResult && <p className="mt-3 text-sm bg-purple-50 p-3 rounded-xl border border-purple-100">{emiResult}</p>}
             </div>
 
+            {/* 6. Price Drop Alert */}
+            <div className="bg-white p-6 rounded-3xl shadow-sm border">
+              <h3 className="font-bold text-xl mb-2 flex items-center gap-2">🔔 Price Drop Alert</h3>
+              <form onSubmit={setAlert} className="space-y-3">
+                <input type="email" name="email" placeholder="Your Email" className="w-full border p-3 rounded-xl outline-none" required />
+                <button type="submit" className="w-full bg-red-600 text-white p-3 rounded-xl font-bold hover:bg-red-700 transition shadow-md">Set Alert</button>
+              </form>
+              {alertMsg && <p className="mt-3 text-sm bg-red-50 p-3 rounded-xl border border-red-100">{alertMsg}</p>}
+            </div>
+
           </div>
         </section>
 
@@ -224,7 +264,7 @@ export default function Home() {
           
           {products.length === 0 ? (
             <div className="text-center bg-gray-50 p-10 rounded-3xl border shadow-sm">
-              <p className="text-gray-500 font-medium text-lg">⏳ Waiting for system to sync products...</p>
+              <p className="text-gray-500 font-medium text-lg">⏳ Waiting for PilotBot to sync products...</p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -245,6 +285,16 @@ export default function Home() {
             </div>
           )}
         </section>
+
+        {/* FOOTER / DISCLOSURE */}
+        <footer className="bg-gray-900 text-gray-400 py-12 px-4 text-center text-xs">
+          <p>Founded by Hamdan | AffiliatePilot is a participant in the Amazon Associates Program.</p>
+          <div className="flex justify-center gap-4 mt-4">
+            <a href="/terms" className="hover:text-white">Legal</a>
+            <a href="/about" className="hover:text-white">About Us</a>
+            <a href="/faq" className="hover:text-white">FAQ</a>
+          </div>
+        </footer>
 
       </main>
     </>
