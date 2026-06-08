@@ -26,21 +26,13 @@ export default function Home() {
 
   // PAYPAL SMART BUTTONS INTEGRATION
   useEffect(() => {
-    // Wait for the PayPal SDK script to load
     const interval = setInterval(() => {
       if (window.paypal) {
         clearInterval(interval);
-        // Render the Pro Subscription Button
         if (document.getElementById('paypal-container-pro')) {
           window.paypal.HostedButtons({
             hostedButtonId: "EM54XCYPTWSLQ",
           }).render("#paypal-container-pro");
-        }
-        // Render the Store Product Button (If you want separate button for store)
-        if (document.getElementById('paypal-container-store')) {
-          window.paypal.HostedButtons({
-            hostedButtonId: "EM54XCYPTWSLQ", // Using same for now
-          }).render("#paypal-container-store");
         }
       }
     }, 500);
@@ -239,16 +231,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRO SUBSCRIPTION SECTION (PAYPAL) */}
+      {/* PRO SUBSCRIPTION SECTION (PAYPAL FIXED UI) */}
       <section id="pro" className="py-20 bg-gradient-to-br from-slate-900 to-indigo-900 text-white">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-4xl font-extrabold mb-4">Unlock Pro Features 💎</h2>
           <p className="text-lg text-gray-300 mb-8">Get unlimited access to real-time coupons, priority price alerts, and premium AI tools.</p>
           
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl inline-block min-w-[300px]">
-            <h3 className="text-2xl font-bold mb-2">AffiliatePilot Pro</h3>
-            <p className="text-5xl font-extrabold my-4">$9<span className="text-lg text-gray-400">/month</span></p>
-            <ul className="text-sm text-left space-y-2 mb-8 text-gray-300">
+          {/* PayPal Container Card - White background is natural for PayPal iframe, added rounded corners and shadow to make it look like a premium card */}
+          <div className="bg-white p-8 rounded-3xl shadow-2xl inline-block w-full max-w-sm text-gray-900">
+            <h3 className="text-2xl font-bold mb-1">AffiliatePilot Pro</h3>
+            <p className="text-5xl font-extrabold my-4 text-blue-600">$9<span className="text-lg text-gray-400">/month</span></p>
+            <ul className="text-sm text-left space-y-2 mb-6 text-gray-600">
               <li>✅ Unlimited Reel Product Search</li>
               <li>✅ Instant Coupon Fetching</li>
               <li>✅ Priority Price Drop Alerts</li>
@@ -256,7 +249,7 @@ export default function Home() {
             </ul>
             
             {/* PAYPAL SMART BUTTON CONTAINER */}
-            <div id="paypal-container-pro" className="bg-white rounded-xl p-2 min-h-[50px] flex justify-center items-center">
+            <div id="paypal-container-pro" className="min-h-[50px] w-full flex justify-center items-center overflow-hidden">
               <p className="text-gray-400 text-xs animate-pulse">Loading Secure Checkout...</p>
             </div>
           </div>
@@ -280,10 +273,9 @@ export default function Home() {
                   <h3 className="font-bold text-sm mb-2">{p.name || 'Product'}</h3>
                   <div className="flex justify-between items-center mt-4">
                     <span className="text-xl font-extrabold text-blue-600">${p.price || '0'}</span>
-                    {/* Store Buy Button - Renders same hosted button ID */}
-                    <div id="paypal-container-store" className="min-w-[150px] min-h-[40px] rounded-lg overflow-hidden flex justify-center items-center">
-                       <a href="/#pro" className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-600 transition">Buy Now</a>
-                    </div>
+                    <a href="/#pro" className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-600 transition">
+                      Buy Now
+                    </a>
                   </div>
                 </div>
               </div>
