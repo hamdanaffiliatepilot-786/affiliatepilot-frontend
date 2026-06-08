@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
+import Script from 'next/script';
 import { createClient } from '@supabase/supabase-js';
 
 export default function Home() {
@@ -23,6 +24,20 @@ export default function Home() {
       if(data) setProducts(data);
     }
     loadData();
+  }, []);
+
+  // PAYPAL SDK RENDER (For Pro Subscription only)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const container = document.getElementById('paypal-subscription-btn');
+      if (window.paypal && container && container.innerHTML === '') {
+        clearInterval(interval);
+        window.paypal.HostedButtons({
+          hostedButtonId: "EM54XCYPTWSLQ",
+        }).render("#paypal-subscription-btn");
+      }
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const convertCurrency = async (e) => {
@@ -54,11 +69,12 @@ export default function Home() {
         setDeals(data.prices);
       } else { throw new Error("Backend error"); }
     } catch(e) {
+      // Fallback if Backend is sleeping
       setDeals([
-        { store: "🛒 Amazon India", price: "Check Latest Price", url: `https://www.amazon.in/s?k=${encodeURIComponent(product)}` },
-        { store: "🛒 Flipkart", price: "Check Latest Price", url: `https://www.flipkart.com/search?q=${encodeURIComponent(product)}` },
-        { store: "🇺🇸 Amazon US", price: "Check Latest Price", url: `https://www.amazon.com/s?k=${encodeURIComponent(product)}` },
-        { store: "🏷️ eBay", price: "Check Latest Price", url: `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(product)}` }
+        { store: "🛒 Amazon India", price: "Check Live Price", url: `https://www.amazon.in/s?k=${encodeURIComponent(product)}` },
+        { store: "🛒 Flipkart", price: "Check Live Price", url: `https://www.flipkart.com/search?q=${encodeURIComponent(product)}` },
+        { store: "🇺🇸 Amazon US", price: "Check Live Price", url: `https://www.amazon.com/s?k=${encodeURIComponent(product)}` },
+        { store: "🏷️ eBay", price: "Check Live Price", url: `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(product)}` }
       ]);
     } finally {
       setLoadingDeal(false);
@@ -98,7 +114,7 @@ export default function Home() {
         setReelResult(`✅ Product Found: "${data.productName}"\n\n🛒 Buy on Amazon: ${data.searchLink}\n\n🛒 Buy on Flipkart: ${data.flipkartLink}`);
       } else { throw new Error("Failed"); }
     } catch(e) {
-      setReelResult(`✅ Reel Detected!\n\n🛒 Find product on Amazon: https://www.amazon.in/s?k=reel+product\n🛒 Find on Flipkart: https://www.flipkart.com/search?q=reel+product\n\n*(Backend is waking up, try again in 60 secs for AI exact match)*`);
+      setReelResult(`🔄 Backend is waking up. Meanwhile, search manually:\n\n🛒 Amazon: https://www.amazon.in/s?k=product+from+reel\n🛒 Flipkart: https://www.flipkart.com/search?q=product+from+reel`);
     } finally {
       setLoadingReel(false);
     }
@@ -116,14 +132,25 @@ export default function Home() {
         setCoupons(data.coupons);
       } else { throw new Error("Failed"); }
     } catch(e) {
-      setCoupons([{ code: "🔥 LIVE DEALS", discount: "Click below to visit store" }]);
+      setCoupons([{ code: "🔥 LIVE DEALS", discount: "Visit store for live coupons" }]);
     } finally {
       setLoadingCoupon(false);
     }
   };
 
+  // Dynamic PayPal Link for Specific Product Price (Dropshipping)
+  const getProductPaypalLink = (product) => {
+    return `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=hamdan.affiliatepilot@gmail.com&item_name=${encodeURIComponent(product.name)}&amount=${product.price}&currency_code=USD`;
+  };
+
   return (
     <>
+      {/* PAYPAL SDK - Loaded smartly to avoid white strip */}
+      <Script 
+        src="https://www.paypal.com/sdk/js?client-id=BAAy4Jh_5teQEDJ8tbAZCzjL6W_uAbRifmXbkTE3oREsveJyqPwxmWLFBKimUGybGzxzBohA3k5KD4IPwI&components=hosted-buttons&disable-funding=venmo&currency=USD"
+        strategy="lazyOnload"
+      />
+
       {/* HERO LANDING SECTION */}
       <section className="relative bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-white py-32 text-center px-4 overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=80')] bg-cover bg-center"></div>
@@ -249,7 +276,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRO SUBSCRIPTION SECTION (PAYPAL BULLETPROOF FIX) */}
+      {/* PRO SUBSCRIPTION SECTION (Official PayPal Hosted Button) */}
       <section id="pro" className="py-20 bg-gradient-to-br from-slate-900 to-indigo-900 text-white">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-4xl font-extrabold mb-4">Unlock Pro Features 💎</h2>
@@ -266,19 +293,15 @@ export default function Home() {
               <li className="flex items-center gap-2"><span className="text-green-500 text-lg">✓</span> Ad-Free Experience</li>
             </ul>
             
-            {/* BULLETPROOF PAYPAL SUBSCRIPTION LINK 
-                This uses the standard PayPal checkout URL. 
-                It hides your personal name and shows "AffiliatePilot" (Your Business Name).
-                It sets up an automatic monthly subscription of $9. */}
-            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick-subscriptions&business=hamdan.affiliatepilot@gmail.com&item_name=AffiliatePilot+Pro+Subscription&a3=9.00&p3=1&t3=M&currency_code=USD&no_shipping=1" target="_blank" className="w-full bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg flex justify-center items-center gap-2 text-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.08-.435.143-.715l.547-3.473a.993.993 0 0 1 .973-.788h.611c3.97 0 7.083-1.616 7.998-6.29.386-1.96.183-3.657-.858-4.795z"/></svg>
-              Subscribe with PayPal
-            </a>
+            {/* PAYPAL SUBSCRIPTION BUTTON (Fixed) */}
+            <div className="w-full flex justify-center overflow-hidden rounded-xl">
+              <div id="paypal-subscription-btn" className="w-full max-w-[250px] min-h-[40px]"></div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* STORE SECTION */}
+      {/* STORE SECTION (Dynamic Pricing for Dropshipping) */}
       <section id="store" className="py-20 bg-white max-w-7xl mx-auto px-4">
         <div className="text-center mb-14"><h2 className="text-4xl font-extrabold">🤖 Daily Curated Finds</h2><p className="text-gray-500 mt-2 text-lg">Best deals updated automatically.</p></div>
         
@@ -295,7 +318,8 @@ export default function Home() {
                   <h3 className="font-bold text-sm mb-2">{p.name || 'Product'}</h3>
                   <div className="flex justify-between items-center mt-4">
                     <span className="text-xl font-extrabold text-blue-600">${p.price || '0'}</span>
-                    <a href="/#pro" className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-600 transition">
+                    {/* DYNAMIC PAYPAL CHECKOUT FOR SPECIFIC PRODUCT */}
+                    <a href={getProductPaypalLink(p)} target="_blank" className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-600 transition">
                       Buy Now
                     </a>
                   </div>
