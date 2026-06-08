@@ -1,4 +1,5 @@
 import './globals.css'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata = {
   title: 'AffiliatePilot Pro - AI Smart Shopping & Deals | By Hamdan',
@@ -60,6 +61,7 @@ export default function RootLayout({ children }) {
           <p className="border-t border-gray-800 pt-6">© 2024 AffiliatePilot. All rights reserved.</p>
         </footer>
 
+        <Analytics />
       </body>
     </html>
   )
