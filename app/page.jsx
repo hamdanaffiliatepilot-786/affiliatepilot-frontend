@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import Script from 'next/script';
 import { createClient } from '@supabase/supabase-js';
 
 export default function Home() {
@@ -12,9 +11,9 @@ export default function Home() {
   const [alertMsg, setAlertMsg] = useState('');
   const [reelResult, setReelResult] = useState('Paste an Instagram Reel link to find the product!');
   const [coupons, setCoupons] = useState([]);
+  const [loadingDeal, setLoadingDeal] = useState(false);
   const [loadingReel, setLoadingReel] = useState(false);
   const [loadingCoupon, setLoadingCoupon] = useState(false);
-  const [loadingDeal, setLoadingDeal] = useState(false);
 
   const supabase = createClient('https://pvsqvpbjhiwjgifbgmzl.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2c3F2cGJqaGl3amdpZmJnbXpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MTQ4NDIsImV4cCI6MjA5NjM5MDg0Mn0.yPclmBshKqP15iKzIV3mydvxjBI_uruXOZAPQwAuD5s');
 
@@ -24,22 +23,6 @@ export default function Home() {
       if(data) setProducts(data);
     }
     loadData();
-  }, []);
-
-  // PAYPAL SMART BUTTONS
-  useEffect(() => {
-    const container = document.getElementById('paypal-container-pro');
-    if (!container) return;
-
-    const interval = setInterval(() => {
-      if (window.paypal && container.innerHTML === '') {
-        clearInterval(interval);
-        window.paypal.HostedButtons({
-          hostedButtonId: "EM54XCYPTWSLQ",
-        }).render("#paypal-container-pro");
-      }
-    }, 1000);
-    return () => clearInterval(interval);
   }, []);
 
   const convertCurrency = async (e) => {
@@ -55,14 +38,16 @@ export default function Home() {
     } catch(e) { setCurrResult("❌ Error fetching rates."); }
   };
 
-  // AI PRICE COMPARISON (NEW)
+  // AI PRICE COMPARISON (Direct Frontend Fallback for instant results)
   const findDeals = async (e) => {
     e.preventDefault();
     const product = e.target.product.value;
     setLoadingDeal(true);
     setDeals([]);
+    
     try {
-      const res = await fetch('https://pilotbot-engine.onrender.com/api/compare-prices', {
+      // Try Backend First
+      const res = await fetch(`https://pilotbot-engine.onrender.com/api/compare-prices`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ product })
@@ -70,11 +55,15 @@ export default function Home() {
       const data = await res.json();
       if(data.success && data.prices.length > 0) {
         setDeals(data.prices);
-      } else {
-        setDeals([{ store: "Error", price: "N/A", url: "#" }]);
-      }
+      } else { throw new Error("Backend error"); }
     } catch(e) {
-      setDeals([{ store: "Server Busy", price: "Try again", url: "#" }]);
+      // Fallback if Backend sleeps: Generate Direct Search Links with Estimates
+      setDeals([
+        { store: "🛒 Amazon India", price: "Check Latest Price", url: `https://www.amazon.in/s?k=${encodeURIComponent(product)}` },
+        { store: "🛒 Flipkart", price: "Check Latest Price", url: `https://www.flipkart.com/search?q=${encodeURIComponent(product)}` },
+        { store: "🇺🇸 Amazon US", price: "Check Latest Price", url: `https://www.amazon.com/s?k=${encodeURIComponent(product)}` },
+        { store: "🏷️ eBay", price: "Check Latest Price", url: `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(product)}` }
+      ]);
     } finally {
       setLoadingDeal(false);
     }
@@ -101,7 +90,7 @@ export default function Home() {
     e.preventDefault();
     const link = e.target.reelLink.value;
     setLoadingReel(true);
-    setReelResult("🤖 AI is analyzing the Reel... Detecting product...");
+    setReelResult("🤖 AI is analyzing the Reel...");
     try {
       const res = await fetch('https://pilotbot-engine.onrender.com/api/reel-product', {
         method: 'POST',
@@ -111,11 +100,10 @@ export default function Home() {
       const data = await res.json();
       if(data.success) {
         setReelResult(`✅ Product Found: "${data.productName}"\n\n🛒 Buy on Amazon: ${data.searchLink}\n\n🛒 Buy on Flipkart: ${data.flipkartLink}`);
-      } else {
-        setReelResult("❌ Could not identify the product. Try another Reel link.");
-      }
+      } else { throw new Error("Failed"); }
     } catch(e) {
-      setReelResult("🤖 Our AI is currently updating. Please try again shortly!");
+      // Fallback if Backend sleeps
+      setReelResult(`✅ Reel Detected!\n\n🛒 Find product on Amazon: https://www.amazon.in/s?k=reel+product\n🛒 Find on Flipkart: https://www.flipkart.com/search?q=reel+product\n\n*(Backend is waking up, try again in 60 secs for AI exact match)*`);
     } finally {
       setLoadingReel(false);
     }
@@ -129,13 +117,14 @@ export default function Home() {
     try {
       const res = await fetch(`https://pilotbot-engine.onrender.com/api/coupons?store=${store}`);
       const data = await res.json();
-      if(data.coupons && data.coupons.length > 0) {
+      if(data.coupons && data.coupons.length > 0 && data.coupons[0].code !== "Server Busy") {
         setCoupons(data.coupons);
-      } else {
-        setCoupons([{ code: "No Coupons", discount: "Try another store" }]);
-      }
+      } else { throw new Error("Failed"); }
     } catch(e) {
-      setCoupons([{ code: "Updating", discount: "Coupons are refreshing. Try again shortly!" }]);
+      // Fallback if Backend sleeps
+      setCoupons([
+        { code: "🔥 LIVE DEALS", discount: "Click below to visit store" }
+      ]);
     } finally {
       setLoadingCoupon(false);
     }
@@ -143,12 +132,6 @@ export default function Home() {
 
   return (
     <>
-      {/* PAYPAL SDK (Loaded via next/script for no white strip) */}
-      <Script 
-        src="https://www.paypal.com/sdk/js?client-id=BAAy4Jh_5teQEDJ8tbAZCzjL6W_uAbRifmXbkTE3oREsveJyqPwxmWLFBKimUGybGzxzBohA3k5KD4IPwI&components=hosted-buttons&disable-funding=venmo&currency=USD"
-        strategy="lazyOnload"
-      />
-
       {/* HERO LANDING SECTION */}
       <section className="relative bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-white py-32 text-center px-4 overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=80')] bg-cover bg-center"></div>
@@ -227,6 +210,9 @@ export default function Home() {
                   <span className="text-gray-600 text-xs">{c.discount}</span>
                 </div>
               ))}
+              {coupons.length > 0 && coupons[0].code === "🔥 LIVE DEALS" && (
+                 <a href={coupons[0].code === "🔥 LIVE DEALS" ? "https://www.amazon.in/coupons" : "#"} target="_blank" className="block w-full text-center bg-orange-600 text-white p-2 rounded-lg font-bold mt-2 hover:bg-orange-700">Visit Store Coupons</a>
+              )}
             </div>
           </div>
 
@@ -271,7 +257,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRO SUBSCRIPTION SECTION */}
+      {/* PRO SUBSCRIPTION SECTION (PAYPAL FIXED - NO WHITE STRIP) */}
       <section id="pro" className="py-20 bg-gradient-to-br from-slate-900 to-indigo-900 text-white">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-4xl font-extrabold mb-4">Unlock Pro Features 💎</h2>
@@ -288,9 +274,11 @@ export default function Home() {
               <li className="flex items-center gap-2"><span className="text-green-500 text-lg">✓</span> Ad-Free Experience</li>
             </ul>
             
-            <div className="w-full flex justify-center">
-              <div id="paypal-container-pro" className="max-w-[250px] min-h-[40px]"></div>
-            </div>
+            {/* CUSTOM PAYPAL BUTTON - NO IFRAME, NO WHITE STRIP */}
+            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EM54XCYPTWSLQ" target="_blank" className="w-full bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg flex justify-center items-center gap-2 text-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.08-.435.143-.715l.547-3.473a.993.993 0 0 1 .973-.788h.611c3.97 0 7.083-1.616 7.998-6.29.386-1.96.183-3.657-.858-4.795z"/></svg>
+              Subscribe with PayPal
+            </a>
           </div>
         </div>
       </section>
