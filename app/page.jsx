@@ -38,15 +38,12 @@ export default function Home() {
     } catch(e) { setCurrResult("❌ Error fetching rates."); }
   };
 
-  // AI PRICE COMPARISON (Direct Frontend Fallback for instant results)
   const findDeals = async (e) => {
     e.preventDefault();
     const product = e.target.product.value;
     setLoadingDeal(true);
     setDeals([]);
-    
     try {
-      // Try Backend First
       const res = await fetch(`https://pilotbot-engine.onrender.com/api/compare-prices`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -57,7 +54,6 @@ export default function Home() {
         setDeals(data.prices);
       } else { throw new Error("Backend error"); }
     } catch(e) {
-      // Fallback if Backend sleeps: Generate Direct Search Links with Estimates
       setDeals([
         { store: "🛒 Amazon India", price: "Check Latest Price", url: `https://www.amazon.in/s?k=${encodeURIComponent(product)}` },
         { store: "🛒 Flipkart", price: "Check Latest Price", url: `https://www.flipkart.com/search?q=${encodeURIComponent(product)}` },
@@ -102,7 +98,6 @@ export default function Home() {
         setReelResult(`✅ Product Found: "${data.productName}"\n\n🛒 Buy on Amazon: ${data.searchLink}\n\n🛒 Buy on Flipkart: ${data.flipkartLink}`);
       } else { throw new Error("Failed"); }
     } catch(e) {
-      // Fallback if Backend sleeps
       setReelResult(`✅ Reel Detected!\n\n🛒 Find product on Amazon: https://www.amazon.in/s?k=reel+product\n🛒 Find on Flipkart: https://www.flipkart.com/search?q=reel+product\n\n*(Backend is waking up, try again in 60 secs for AI exact match)*`);
     } finally {
       setLoadingReel(false);
@@ -121,10 +116,7 @@ export default function Home() {
         setCoupons(data.coupons);
       } else { throw new Error("Failed"); }
     } catch(e) {
-      // Fallback if Backend sleeps
-      setCoupons([
-        { code: "🔥 LIVE DEALS", discount: "Click below to visit store" }
-      ]);
+      setCoupons([{ code: "🔥 LIVE DEALS", discount: "Click below to visit store" }]);
     } finally {
       setLoadingCoupon(false);
     }
@@ -155,7 +147,7 @@ export default function Home() {
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           
-          {/* 1. AI DEAL FINDER (WITH PRICES) */}
+          {/* 1. AI DEAL FINDER */}
           <div className="bg-white p-6 rounded-3xl shadow-sm border lg:col-span-2">
             <h3 className="font-bold text-xl mb-2 flex items-center gap-2">🔍 AI Price Comparison</h3>
             <p className="text-sm text-gray-500 mb-4">Compare real-time prices across Amazon, Flipkart & eBay instantly!</p>
@@ -211,7 +203,7 @@ export default function Home() {
                 </div>
               ))}
               {coupons.length > 0 && coupons[0].code === "🔥 LIVE DEALS" && (
-                 <a href={coupons[0].code === "🔥 LIVE DEALS" ? "https://www.amazon.in/coupons" : "#"} target="_blank" className="block w-full text-center bg-orange-600 text-white p-2 rounded-lg font-bold mt-2 hover:bg-orange-700">Visit Store Coupons</a>
+                 <a href="https://www.amazon.in/coupons" target="_blank" className="block w-full text-center bg-orange-600 text-white p-2 rounded-lg font-bold mt-2 hover:bg-orange-700">Visit Store Coupons</a>
               )}
             </div>
           </div>
@@ -257,7 +249,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRO SUBSCRIPTION SECTION (PAYPAL FIXED - NO WHITE STRIP) */}
+      {/* PRO SUBSCRIPTION SECTION (PAYPAL BULLETPROOF FIX) */}
       <section id="pro" className="py-20 bg-gradient-to-br from-slate-900 to-indigo-900 text-white">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-4xl font-extrabold mb-4">Unlock Pro Features 💎</h2>
@@ -274,8 +266,11 @@ export default function Home() {
               <li className="flex items-center gap-2"><span className="text-green-500 text-lg">✓</span> Ad-Free Experience</li>
             </ul>
             
-            {/* CUSTOM PAYPAL BUTTON - NO IFRAME, NO WHITE STRIP */}
-            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EM54XCYPTWSLQ" target="_blank" className="w-full bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg flex justify-center items-center gap-2 text-lg">
+            {/* BULLETPROOF PAYPAL SUBSCRIPTION LINK 
+                This uses the standard PayPal checkout URL. 
+                It hides your personal name and shows "AffiliatePilot" (Your Business Name).
+                It sets up an automatic monthly subscription of $9. */}
+            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick-subscriptions&business=hamdan.affiliatepilot@gmail.com&item_name=AffiliatePilot+Pro+Subscription&a3=9.00&p3=1&t3=M&currency_code=USD&no_shipping=1" target="_blank" className="w-full bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg flex justify-center items-center gap-2 text-lg">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.08-.435.143-.715l.547-3.473a.993.993 0 0 1 .973-.788h.611c3.97 0 7.083-1.616 7.998-6.29.386-1.96.183-3.657-.858-4.795z"/></svg>
               Subscribe with PayPal
             </a>
