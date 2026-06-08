@@ -8,6 +8,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        {/* GOOGLE SEARCH CONSOLE VERIFICATION */}
+        <meta name="google-site-verification" content="e3FvdmFn_2v8Jn4fwshYFDgL9_tSD9RNWotL_cyFBp4" />
+        
+        {/* PAYPAL SDK */}
+        <script src="https://www.paypal.com/sdk/js?client-id=BAAy4Jh_5teQEDJ8tbAZCzjL6W_uAbRifmXbkTE3oREsveJyqPwxmWLFBKimUGybGzxzBohA3k5KD4IPwI&components=hosted-buttons&disable-funding=venmo&currency=USD" async></script>
+      </head>
       <body className="font-sans bg-gray-50 text-gray-900">
         
         {/* GLOBAL NAVBAR */}
@@ -24,7 +31,6 @@ export default function RootLayout({ children }) {
               <a href="/terms" className="hover:text-blue-600 transition">Legal</a>
               <a href="/faq" className="hover:text-blue-600 transition">FAQ</a>
             </div>
-            {/* GO PRO BUTTON LINKING TO SUBSCRIPTION SECTION */}
             <a href="/#pro" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm">Go Pro 💎</a>
           </div>
         </nav>
