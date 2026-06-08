@@ -1,16 +1,26 @@
-'use client';
+"use client"
+
 import { useState, useEffect } from 'react';
 
 export default function AdminDashboard() {
+  const [auth, setAuth] = useState(false);
   const [settings, setSettings] = useState({});
   const [msg, setMsg] = useState('');
 
   const BACKEND_URL = 'https://pilotbot-engine.onrender.com'; 
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/api/settings`)
-      .then(res => res.json())
-      .then(data => setSettings(data));
+    // Password Check
+    const pass = prompt("Enter Admin Password:");
+    if (pass === "Mrhamdu123@") {
+      setAuth(true);
+      fetch(`${BACKEND_URL}/api/settings`)
+        .then(res => res.json())
+        .then(data => setSettings(data));
+    } else {
+      alert("Access Denied!");
+      window.location.href = "/"; // Redirect to home if wrong password
+    }
   }, []);
 
   const saveSettings = async (e) => {
@@ -23,11 +33,13 @@ export default function AdminDashboard() {
         body: JSON.stringify(settings)
       });
       const data = await res.json();
-      setMsg(data.success ? '✅ Settings Saved! Agent is updated.' : '❌ Error saving.');
+      setMsg(data.success ? '✅ Settings Saved! Agent will use them.' : '❌ Error saving.');
     } catch(e) {
       setMsg('❌ Backend connection failed.');
     }
   };
+
+  if(!auth) return null; // Don't show dashboard until authenticated
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
@@ -37,12 +49,17 @@ export default function AdminDashboard() {
         
         <div className="border-b border-gray-700 pb-4">
           <h2 className="text-xl font-bold text-amber-400">🔑 API Keys & Links</h2>
-          <p className="text-xs text-gray-400 mt-1">Add keys here. Agent will use them automatically.</p>
+          <p className="text-xs text-gray-400 mt-1">Agent will automatically use these keys for Auto-Blogging, Pinterest, and CJ.</p>
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Gemini AI Key</label>
           <input type="text" value={settings.gemini_key || ''} onChange={e => setSettings({...settings, gemini_key: e.target.value})} className="w-full bg-gray-700 p-2 rounded text-sm" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Blogger API Refresh Token (Read instructions below)</label>
+          <input type="text" value={settings.blogger_token || ''} onChange={e => setSettings({...settings, blogger_token: e.target.value})} className="w-full bg-gray-700 p-2 rounded text-sm" placeholder="ya29.a0AfH6..." />
         </div>
 
         <div>
@@ -53,11 +70,6 @@ export default function AdminDashboard() {
         <div>
           <label className="block text-sm font-medium mb-1">Pinterest Developer Token</label>
           <input type="text" value={settings.pinterest_token || ''} onChange={e => setSettings({...settings, pinterest_token: e.target.value})} className="w-full bg-gray-700 p-2 rounded text-sm" placeholder="Enter Pinterest Token..." />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Blogger API Token</label>
-          <input type="text" value={settings.blogger_token || ''} onChange={e => setSettings({...settings, blogger_token: e.target.value})} className="w-full bg-gray-700 p-2 rounded text-sm" placeholder="ya29..." />
         </div>
 
         <div>
