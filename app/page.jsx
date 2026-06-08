@@ -24,6 +24,29 @@ export default function Home() {
     loadData();
   }, []);
 
+  // PAYPAL SMART BUTTONS INTEGRATION
+  useEffect(() => {
+    // Wait for the PayPal SDK script to load
+    const interval = setInterval(() => {
+      if (window.paypal) {
+        clearInterval(interval);
+        // Render the Pro Subscription Button
+        if (document.getElementById('paypal-container-pro')) {
+          window.paypal.HostedButtons({
+            hostedButtonId: "EM54XCYPTWSLQ",
+          }).render("#paypal-container-pro");
+        }
+        // Render the Store Product Button (If you want separate button for store)
+        if (document.getElementById('paypal-container-store')) {
+          window.paypal.HostedButtons({
+            hostedButtonId: "EM54XCYPTWSLQ", // Using same for now
+          }).render("#paypal-container-store");
+        }
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
   const convertCurrency = async (e) => {
     e.preventDefault();
     const amt = e.target.amount.value;
@@ -64,13 +87,11 @@ export default function Home() {
     if(email) setAlertMsg(`✅ Alert set for ${email}! PilotBot will notify you.`);
   };
 
-  // PROFESSIONAL ERROR HANDLING FOR REELS
   const findReelProduct = async (e) => {
     e.preventDefault();
     const link = e.target.reelLink.value;
     setLoadingReel(true);
     setReelResult("🤖 AI is analyzing the Reel... Detecting product...");
-    
     try {
       const res = await fetch('https://pilotbot-engine.onrender.com/api/reel-product', {
         method: 'POST',
@@ -78,26 +99,23 @@ export default function Home() {
         body: JSON.stringify({ reelUrl: link })
       });
       const data = await res.json();
-      
       if(data.success) {
         setReelResult(`✅ Product Found: "${data.productName}"\n\n🛒 Buy on Amazon: ${data.searchLink}\n\n🛒 Buy on Flipkart: ${data.flipkartLink}`);
       } else {
         setReelResult("❌ Could not identify the product. Try another Reel link.");
       }
     } catch(e) {
-      setReelResult("🤖 Our AI is currently busy updating its memory. Please try again in 60 seconds!"); // User friendly message
+      setReelResult("🤖 Our AI is currently updating. Please try again shortly!");
     } finally {
       setLoadingReel(false);
     }
   };
 
-  // PROFESSIONAL ERROR HANDLING FOR COUPONS
   const fetchCoupons = async (e) => {
     e.preventDefault();
     const store = e.target.store.value;
     setLoadingCoupon(true);
     setCoupons([{ code: "LOADING...", discount: "Fetching live data..." }]);
-    
     try {
       const res = await fetch(`https://pilotbot-engine.onrender.com/api/coupons?store=${store}`);
       const data = await res.json();
@@ -107,22 +125,17 @@ export default function Home() {
         setCoupons([{ code: "No Coupons", discount: "Try another store" }]);
       }
     } catch(e) {
-      setCoupons([{ code: "Updating", discount: "Coupons are refreshing. Try again shortly!" }]); // User friendly message
+      setCoupons([{ code: "Updating", discount: "Coupons are refreshing. Try again shortly!" }]);
     } finally {
       setLoadingCoupon(false);
     }
   };
 
-  // PAYPAL PROFESSIONAL CHECKOUT (Hides Name, Shows Product & Price)
-  const getPaypalLink = (product) => {
-    const email = 'hamdan.affiliatepilot@gmail.com'; // Your PayPal email
-    const itemName = encodeURIComponent(product.name);
-    const price = product.price;
-    return `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${email}&item_name=${itemName}&amount=${price}&currency_code=USD`;
-  };
-
   return (
     <>
+      {/* PAYPAL SDK SCRIPT */}
+      <script src="https://www.paypal.com/sdk/js?client-id=BAAy4Jh_5teQEDJ8tbAZCzjL6W_uAbRifmXbkTE3oREsveJyqPwxmWLFBKimUGybGzxzBohA3k5KD4IPwI&components=hosted-buttons&disable-funding=venmo&currency=USD" async></script>
+
       {/* HERO LANDING SECTION */}
       <section className="relative bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-white py-32 text-center px-4 overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=80')] bg-cover bg-center"></div>
@@ -132,7 +145,7 @@ export default function Home() {
           <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">Find products from Instagram Reels, compare prices, get real-time coupons, and track price drops automatically. Founded by Hamdan.</p>
           <div className="flex flex-wrap gap-4 justify-center">
             <a href="#tools" className="bg-white text-gray-900 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition text-lg shadow-lg">Use Free Tools 🛠️</a>
-            <a href="#store" className="bg-white/10 border border-white/20 px-8 py-4 rounded-xl font-bold hover:bg-white/20 transition text-lg">Shop Deals 🛒</a>
+            <a href="#pro" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-xl font-bold hover:from-amber-600 hover:to-orange-600 transition text-lg shadow-lg">Go Pro 💎</a>
           </div>
         </div>
       </section>
@@ -226,7 +239,31 @@ export default function Home() {
         </div>
       </section>
 
-      {/* STORE SECTION (PAYPAL PROFESSIONAL CHECKOUT) */}
+      {/* PRO SUBSCRIPTION SECTION (PAYPAL) */}
+      <section id="pro" className="py-20 bg-gradient-to-br from-slate-900 to-indigo-900 text-white">
+        <div className="max-w-4xl mx-auto text-center px-4">
+          <h2 className="text-4xl font-extrabold mb-4">Unlock Pro Features 💎</h2>
+          <p className="text-lg text-gray-300 mb-8">Get unlimited access to real-time coupons, priority price alerts, and premium AI tools.</p>
+          
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl inline-block min-w-[300px]">
+            <h3 className="text-2xl font-bold mb-2">AffiliatePilot Pro</h3>
+            <p className="text-5xl font-extrabold my-4">$9<span className="text-lg text-gray-400">/month</span></p>
+            <ul className="text-sm text-left space-y-2 mb-8 text-gray-300">
+              <li>✅ Unlimited Reel Product Search</li>
+              <li>✅ Instant Coupon Fetching</li>
+              <li>✅ Priority Price Drop Alerts</li>
+              <li>✅ Ad-Free Experience</li>
+            </ul>
+            
+            {/* PAYPAL SMART BUTTON CONTAINER */}
+            <div id="paypal-container-pro" className="bg-white rounded-xl p-2 min-h-[50px] flex justify-center items-center">
+              <p className="text-gray-400 text-xs animate-pulse">Loading Secure Checkout...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* STORE SECTION */}
       <section id="store" className="py-20 bg-white max-w-7xl mx-auto px-4">
         <div className="text-center mb-14"><h2 className="text-4xl font-extrabold">🤖 Daily Curated Finds</h2><p className="text-gray-500 mt-2 text-lg">Best deals updated automatically.</p></div>
         
@@ -243,9 +280,10 @@ export default function Home() {
                   <h3 className="font-bold text-sm mb-2">{p.name || 'Product'}</h3>
                   <div className="flex justify-between items-center mt-4">
                     <span className="text-xl font-extrabold text-blue-600">${p.price || '0'}</span>
-                    <a href={p.source === 'cj_dropship' ? getPaypalLink(p) : (p.affiliate_link || '#')} target="_blank" className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-600 transition">
-                      {p.source === 'cj_dropship' ? 'Buy Now' : 'Get Deal 🔗'}
-                    </a>
+                    {/* Store Buy Button - Renders same hosted button ID */}
+                    <div id="paypal-container-store" className="min-w-[150px] min-h-[40px] rounded-lg overflow-hidden flex justify-center items-center">
+                       <a href="/#pro" className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-600 transition">Buy Now</a>
+                    </div>
                   </div>
                 </div>
               </div>
