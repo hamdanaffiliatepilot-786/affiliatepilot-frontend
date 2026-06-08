@@ -24,11 +24,11 @@ export default function RootLayout({ children }) {
               <a href="/terms" className="hover:text-blue-600 transition">Legal</a>
               <a href="/faq" className="hover:text-blue-600 transition">FAQ</a>
             </div>
-            <a href="https://paypal.me/AbuHamdan978" target="_blank" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm">Go Pro 💎</a>
+            {/* GO PRO BUTTON LINKING TO SUBSCRIPTION SECTION */}
+            <a href="/#pro" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm">Go Pro 💎</a>
           </div>
         </nav>
 
-        {/* PAGE CONTENT */}
         <main>{children}</main>
 
         {/* GLOBAL FOOTER */}
