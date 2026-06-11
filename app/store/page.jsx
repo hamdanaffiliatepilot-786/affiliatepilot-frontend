@@ -6,102 +6,135 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SB_URL, process.env.NEXT_PUBLIC_SB_KEY);
 
-export default function Store() {
-  const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+export default function Home() {
+  const [trending, setTrending] = useState([]);
+  const [product, setProduct] = useState('');
+  const [deals, setDeals] = useState([]);
+  const [emiResult, setEmiResult] = useState('');
+  const [currResult, setCurrResult] = useState('');
 
-  useEffect(() => {
-    async function load() {
-      const { data } = await supabase.from('store_products').select('*').order('created_at', { ascending: false });
-      if(data) setProducts(data);
-    }
-    load();
-    const savedCart = localStorage.getItem('pilotCart');
-    if(savedCart) setCart(JSON.parse(savedCart));
-  }, []);
+  useEffect(() => { fetchTrending(); }, []);
 
-  const addToCart = (product, e) => {
-    e.preventDefault();
-    if(cart.find(c => c.id === product.id)) return alert("Already in cart!");
-    const newCart = [...cart, product];
-    setCart(newCart);
-    localStorage.setItem('pilotCart', JSON.stringify(newCart));
-    setIsCartOpen(true);
+  const fetchTrending = async () => {
+    const { data } = await supabase.from('store_products').select('*').order('created_at', { ascending: false }).limit(8);
+    if(data) setTrending(data);
   };
 
-  const cartTotal = cart.reduce((sum, item) => sum + parseFloat(String(item.price_usd).replace(/[^0-9.]/g, '')), 0);
+  const findDeals = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/compare-prices`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ product })
+      });
+      const data = await res.json();
+      if(data.success) setDeals(data.prices);
+    } catch(e) {}
+  };
+
+  const calcEMI = (e) => {
+    e.preventDefault(); const P = parseFloat(e.target.loan.value);
+    const r = parseFloat(e.target.rate.value) / 12 / 100; const n = parseFloat(e.target.months.value);
+    if(P && r && n) { const emi = P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1); setEmiResult(`💰 Monthly EMI = ₹${emi.toFixed(2)} | Total = ₹${(emi * n).toFixed(2)}`); }
+  };
+
+  const convertCurrency = async (e) => {
+    e.preventDefault(); const amt = e.target.amount.value; const from = e.target.from.value; const to = e.target.to.value;
+    try {
+      const res = await fetch(`https://api.exchangerate-api.com/v4/latest/${from}`);
+      const data = await res.json(); const rate = data.rates[to];
+      setCurrResult(`✅ ${amt} ${from} = ${(amt * rate).toFixed(2)} ${to}`);
+    } catch(e) { setCurrResult("Error"); }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-10">
-      {isCartOpen && (
-        <div className="fixed inset-0 bg-black/60 z-50" onClick={() => setIsCartOpen(false)}>
-          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center p-5 border-b">
-              <h2 className="text-xl font-extrabold">Cart ({cart.length})</h2>
-              <button onClick={() => setIsCartOpen(false)} className="text-3xl">&times;</button>
-            </div>
-            <div className="flex-grow overflow-y-auto p-5 space-y-4">
-              {cart.length === 0 ? <p className="text-center py-20 text-gray-400">Cart is empty</p> : cart.map(item => (
-                <div key={item.id} className="flex gap-4 border-b pb-4">
-                  {/* Cart Image Optimized */}
-                  <Image src={item.image} alt={item.name} width={80} height={80} className="rounded object-cover" />
-                  <div>
-                    <h3 className="font-bold text-sm">{item.name}</h3>
-                    <p className="text-blue-600 font-bold">${item.price_usd}</p>
-                    <button onClick={() => { const n = cart.filter(c=>c.id!==item.id); setCart(n); localStorage.setItem('pilotCart', JSON.stringify(n)); }} className="text-red-500 text-xs">Remove</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {cart.length > 0 && (
-              <div className="p-5 border-t bg-gray-50">
-                <div className="flex justify-between mb-4">
-                  <span>Subtotal:</span>
-                  <span className="text-2xl font-extrabold">${cartTotal.toFixed(2)}</span>
-                </div>
-                <Link href="/checkout" onClick={() => setIsCartOpen(false)} className="block w-full text-center bg-yellow-400 hover:bg-yellow-500 text-black py-3 rounded-full font-bold text-lg shadow-md">Proceed to Checkout</Link>
-              </div>
-            )}
+    <>
+      {/* HERO SECTION */}
+      <section className="relative bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-white py-32 text-center px-4 overflow-hidden">
+        <div className="relative z-10 max-w-4xl mx-auto">
+          <h1 className="text-5xl lg:text-7xl font-extrabold mb-6 leading-tight">Smart Shopping <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Powered by AI</span></h1>
+          <p className="text-lg text-gray-200 mb-8 max-w-2xl mx-auto">Find products from Reels, compare prices across 8 sites, and get the best deals worldwide. Free Shipping!</p>
+          <div className="flex flex-wrap gap-4 justify-center mt-8">
+            <Link href="/store" className="bg-white text-gray-900 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition text-lg shadow-lg">Shop Trending 🛍️</Link>
+            <a href="#tools" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg">Use Free Tools 🛠️</a>
+          </div>
+          <div className="flex justify-center gap-8 mt-12 text-sm font-medium text-gray-200">
+            <span>🔒 100% Secure</span>
+            <span>🤖 AI Powered</span>
+            <span>✈️ FREE Shipping</span>
           </div>
         </div>
-      )}
+      </section>
 
-      <div className="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-extrabold">Curated Store</h1>
-            <p className="text-xs text-gray-500">FREE Worldwide Shipping</p>
-          </div>
-          <button onClick={() => setIsCartOpen(true)} className="relative bg-gray-100 hover:bg-gray-200 p-3 rounded-full">
-            🛒 {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">{cart.length}</span>}
-          </button>
+      {/* TRENDING PRODUCTS */}
+      <section className="max-w-7xl mx-auto px-4 py-20">
+        <div className="flex justify-between items-center mb-10">
+          <h2 className="text-4xl font-extrabold">🔥 Trending Products</h2>
+          <Link href="/store" className="text-blue-600 font-bold hover:underline">View All →</Link>
         </div>
-      </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {trending.length === 0 ? (
+            <p className="text-gray-400 col-span-4 text-center py-10">⏳ AI is fetching latest products. Please wait or click import!</p>
+          ) : (
+            trending.map(p => (
+              <Link href={`/product/${p.id}`} key={p.id} className="bg-white rounded-2xl shadow-sm border hover:shadow-xl transition group overflow-hidden">
+                <div className="relative aspect-square bg-gray-50 p-4 overflow-hidden">
+                  <Image src={p.image} alt={p.name} fill className="object-contain group-hover:scale-110 transition-transform" sizes="(max-width: 768px) 50vw, 25vw" />
+                </div>
+                <div className="p-4 border-t">
+                  <h3 className="font-bold text-sm line-clamp-2 mb-2 h-10">{p.name}</h3>
+                  <p className="text-blue-600 font-extrabold text-lg">${p.price_usd} <span className="text-xs text-green-600 font-normal">FREE Ship</span></p>
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map(p => (
-          <Link href={`/product/${p.id}`} key={p.id} className="bg-white rounded-2xl shadow-sm border hover:shadow-xl transition group overflow-hidden flex flex-col">
-            {/* Grid Image Optimized with fill */}
-            <div className="relative aspect-square bg-gray-50 p-4 overflow-hidden">
-              <Image 
-                src={p.image} 
-                alt={p.name} 
-                fill 
-                className="object-contain group-hover:scale-110 transition-transform" 
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />
+      {/* TOOLS SECTION */}
+      <section id="tools" className="bg-gray-50 py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-extrabold text-center mb-12">🛠️ Smart Shopping Tools</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            
+            {/* Tool 1: Compare */}
+            <div className="bg-white p-6 rounded-2xl border shadow-sm">
+              <h3 className="font-bold text-xl mb-4">🔍 Price Comparison</h3>
+              <form onSubmit={findDeals} className="space-y-3">
+                <input type="text" value={product} onChange={(e)=>setProduct(e.target.value)} placeholder="e.g., iPhone 15" aria-label="Product name for comparison" className="w-full border p-3 rounded-xl outline-none" required />
+                <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700">Compare</button>
+              </form>
+              {deals.length > 0 && <div className="mt-4 max-h-40 overflow-auto">{deals.slice(0,3).map((d, i) => <div key={i} className="flex justify-between text-sm border-b py-2"><span className="font-bold">{d.store}</span><a href={d.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Visit</a></div>)}</div>}
             </div>
-            <div className="p-4 flex-grow flex flex-col border-t">
-              <h3 className="font-bold text-sm line-clamp-2 mb-2">{p.name}</h3>
-              <div className="mt-auto">
-                <p className="text-xl font-extrabold text-gray-900">${p.price_usd} <span className="text-xs text-green-600 font-normal">FREE Ship</span></p>
-                <button onClick={(e) => addToCart(p, e)} className="mt-3 w-full bg-gray-900 hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-bold transition">Add to Cart</button>
-              </div>
+
+            {/* Tool 2: EMI */}
+            <div className="bg-white p-6 rounded-2xl border shadow-sm">
+              <h3 className="font-bold text-xl mb-4">💳 EMI Calculator</h3>
+              <form onSubmit={calcEMI} className="space-y-3">
+                <input name="loan" type="number" placeholder="Loan Amount (₹)" aria-label="Loan Amount" className="w-full border p-3 rounded-xl outline-none" required />
+                <input name="rate" type="number" placeholder="Interest Rate (%)" aria-label="Interest Rate" className="w-full border p-3 rounded-xl outline-none" required />
+                <input name="months" type="number" placeholder="Tenure (Months)" aria-label="Tenure in Months" className="w-full border p-3 rounded-xl outline-none" required />
+                <button type="submit" className="w-full bg-purple-600 text-white p-3 rounded-xl font-bold hover:bg-purple-700">Calculate</button>
+              </form>
+              {emiResult && <p className="mt-3 text-sm bg-purple-50 p-3 rounded-xl border">{emiResult}</p>}
             </div>
-          </Link>
-        ))}
-      </div>
-    </div>
+
+            {/* Tool 3: Currency */}
+            <div className="bg-white p-6 rounded-2xl border shadow-sm">
+              <h3 className="font-bold text-xl mb-4">💱 Currency Converter</h3>
+              <form onSubmit={convertCurrency} className="space-y-3">
+                <input name="amount" type="number" defaultValue="100" aria-label="Currency Amount" className="w-full border p-3 rounded-xl outline-none" required />
+                <div className="flex gap-2">
+                  <select name="from" aria-label="Convert from currency" className="w-1/2 border p-3 rounded-xl outline-none"><option>USD</option><option>EUR</option></select>
+                  <select name="to" aria-label="Convert to currency" className="w-1/2 border p-3 rounded-xl outline-none"><option>INR</option><option>USD</option></select>
+                </div>
+                <button type="submit" className="w-full bg-green-600 text-white p-3 rounded-xl font-bold hover:bg-green-700">Convert</button>
+              </form>
+              {currResult && <p className="mt-3 text-sm bg-green-50 p-3 rounded-xl border">{currResult}</p>}
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

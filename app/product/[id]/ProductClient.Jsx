@@ -94,21 +94,14 @@ export default function ProductClient({ id }) {
         <div className="max-w-6xl mx-auto">
           <Link href="/store" className="text-blue-600 font-bold mb-6 inline-block">← Back to Store</Link>
           
-          <nav className="text-sm text-gray-500 mb-4">
+          <nav className="text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-blue-600">Home</Link> &gt; <Link href="/store" className="hover:text-blue-600">Store</Link> &gt; <span className="text-gray-800 font-medium">{product.name?.substring(0, 30)}</span>
           </nav>
 
           <div className="grid md:grid-cols-2 gap-10 bg-white p-8 rounded-2xl shadow-sm border">
             
-            {/* NEXT.JS OPTIMIZED IMAGE */}
             <div className="relative w-full aspect-square bg-gray-50 overflow-hidden rounded-xl border">
-              <Image 
-                src={product.image} 
-                alt={product.name} 
-                fill 
-                className="object-contain" 
-                priority 
-              />
+              <Image src={product.image} alt={product.name} fill className="object-contain" priority />
             </div>
 
             <div className="flex flex-col">
@@ -138,14 +131,14 @@ export default function ProductClient({ id }) {
             <div className="mt-12 bg-white p-8 rounded-2xl shadow-sm border-2 border-amber-500">
               <h2 className="text-2xl font-extrabold mb-6 text-center">📦 Delivery Address</h2>
               <div className="grid md:grid-cols-2 gap-4">
-                <input name="fullName" placeholder="Full Name" onChange={handleInput} className="border p-3 rounded-xl" />
-                <input name="email" type="email" placeholder="Email" onChange={handleInput} className="border p-3 rounded-xl" />
-                <input name="phone" placeholder="Phone" onChange={handleInput} className="border p-3 rounded-xl" />
-                <input name="country" placeholder="Country" onChange={handleInput} className="border p-3 rounded-xl" />
-                <input name="state" placeholder="State" onChange={handleInput} className="border p-3 rounded-xl" />
-                <input name="city" placeholder="City" onChange={handleInput} className="border p-3 rounded-xl" />
-                <input name="zip" placeholder="Zip Code" onChange={handleInput} className="border p-3 rounded-xl" />
-                <input name="address" placeholder="Street Address" onChange={handleInput} className="border p-3 rounded-xl" />
+                <input name="fullName" placeholder="Full Name" onChange={handleInput} aria-label="Full Name" className="border p-3 rounded-xl" />
+                <input name="email" type="email" placeholder="Email" onChange={handleInput} aria-label="Email Address" className="border p-3 rounded-xl" />
+                <input name="phone" placeholder="Phone" onChange={handleInput} aria-label="Phone Number" className="border p-3 rounded-xl" />
+                <input name="country" placeholder="Country" onChange={handleInput} aria-label="Country" className="border p-3 rounded-xl" />
+                <input name="state" placeholder="State" onChange={handleInput} aria-label="State" className="border p-3 rounded-xl" />
+                <input name="city" placeholder="City" onChange={handleInput} aria-label="City" className="border p-3 rounded-xl" />
+                <input name="zip" placeholder="Zip Code" onChange={handleInput} aria-label="Zip Code" className="border p-3 rounded-xl" />
+                <input name="address" placeholder="Street Address" onChange={handleInput} aria-label="Street Address" className="border p-3 rounded-xl" />
               </div>
               <div className="mt-8 p-6 bg-gray-50 rounded-xl text-center" id="paypal-button-container"></div>
             </div>
@@ -154,8 +147,8 @@ export default function ProductClient({ id }) {
           <div className="mt-12 bg-white p-8 rounded-2xl shadow-sm border">
             <h2 className="text-2xl font-extrabold mb-6">⭐ Customer Reviews</h2>
             <form onSubmit={submitReview} className="mb-8 bg-gray-50 p-4 rounded-xl">
-              <input type="text" placeholder="Your Name" value={reviewForm.name} onChange={(e)=>setReviewForm({...reviewForm, name: e.target.value})} className="w-full border p-2 rounded mb-2" required />
-              <textarea placeholder="Write a review..." value={reviewForm.comment} onChange={(e)=>setReviewForm({...reviewForm, comment: e.target.value})} className="w-full border p-2 rounded mb-2 h-20" required></textarea>
+              <input type="text" placeholder="Your Name" value={reviewForm.name} onChange={(e)=>setReviewForm({...reviewForm, name: e.target.value})} aria-label="Your Name" className="w-full border p-2 rounded mb-2" required />
+              <textarea placeholder="Write a review..." value={reviewForm.comment} onChange={(e)=>setReviewForm({...reviewForm, comment: e.target.value})} aria-label="Write your review" className="w-full border p-2 rounded mb-2 h-20" required></textarea>
               <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded font-bold">Submit Review</button>
             </form>
             {reviews.length === 0 ? <p className="text-gray-400 text-sm">No reviews yet. Be the first!</p> : reviews.map(r=> (
