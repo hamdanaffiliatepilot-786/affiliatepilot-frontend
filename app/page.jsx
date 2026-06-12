@@ -96,7 +96,6 @@ export default function Home() {
           <h2 className="text-4xl font-extrabold text-center mb-12">🛠️ Smart Shopping Tools</h2>
           <div className="grid md:grid-cols-3 gap-6">
             
-            {/* Tool 1: Compare */}
             <div className="bg-white p-6 rounded-2xl border shadow-sm">
               <h3 className="font-bold text-xl mb-4">🔍 Price Comparison</h3>
               <form onSubmit={findDeals} className="space-y-3">
@@ -106,7 +105,6 @@ export default function Home() {
               {deals.length > 0 && <div className="mt-4 max-h-40 overflow-auto">{deals.slice(0,3).map((d, i) => <div key={i} className="flex justify-between text-sm border-b py-2"><span className="font-bold">{d.store}</span><a href={d.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Visit</a></div>)}</div>}
             </div>
 
-            {/* Tool 2: EMI */}
             <div className="bg-white p-6 rounded-2xl border shadow-sm">
               <h3 className="font-bold text-xl mb-4">💳 EMI Calculator</h3>
               <form onSubmit={calcEMI} className="space-y-3">
@@ -118,7 +116,6 @@ export default function Home() {
               {emiResult && <p className="mt-3 text-sm bg-purple-50 p-3 rounded-xl border">{emiResult}</p>}
             </div>
 
-            {/* Tool 3: Currency */}
             <div className="bg-white p-6 rounded-2xl border shadow-sm">
               <h3 className="font-bold text-xl mb-4">💱 Currency Converter</h3>
               <form onSubmit={convertCurrency} className="space-y-3">
@@ -131,7 +128,6 @@ export default function Home() {
               </form>
               {currResult && <p className="mt-3 text-sm bg-green-50 p-3 rounded-xl border">{currResult}</p>}
             </div>
-
           </div>
         </div>
       </section>
