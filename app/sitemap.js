@@ -1,17 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 
-export const revalidate = 3600; // 🔥 VERCEL EDGE CACHE - 1 HOUR FAST RESPONSE
+export const revalidate = 3600;
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SB_URL, process.env.NEXT_PUBLIC_SB_KEY);
 
 export default async function sitemap() {
-  const { data: products } = await supabase.from('store_products').select('id, created_at');
-  const productUrls = (products || []).map((p) => ({
-    url: `https://affiliatepilot-frontend.vercel.app/product/${p.id}`,
-    lastModified: new Date(p.created_at),
-    changeFrequency: 'daily',
-    priority: 0.8,
-  }));
+  let productUrls = [];
+  try {
+    const { data: products } = await supabase.from('store_products').select('id, created_at');
+    productUrls = (products || []).map((p) => ({
+      url: `https://affiliatepilot-frontend.vercel.app/product/${p.id}`,
+      lastModified: new Date(p.created_at),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    }));
+  } catch(e) { console.error("Sitemap DB Error", e); }
 
   const staticUrls = [
     { url: 'https://affiliatepilot-frontend.vercel.app', lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
