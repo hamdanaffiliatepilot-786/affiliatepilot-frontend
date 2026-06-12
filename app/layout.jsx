@@ -1,5 +1,6 @@
 import './globals.css';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const LOGO_URL = "https://z-cdn-media.chatglm.cn/files/f57e5ecf-3851-451b-85be-81edc12550ec.png?auth_key=1880958256-a4ec5c83ad274ef88c40ebf635d53c56-0-77f68c8df2516c58efa9b22ef1eebc1e";
 
@@ -33,7 +34,7 @@ export default function RootLayout({ children }) {
         <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <Link href="/" className="flex items-center gap-2">
-              <img src={LOGO_URL} alt="AffiliatePilot Logo" className="h-10 w-auto" />
+              <Image src={LOGO_URL} alt="AffiliatePilot Logo" width={40} height={40} className="h-10 w-auto" priority />
             </Link>
             
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
@@ -52,7 +53,7 @@ export default function RootLayout({ children }) {
 
         <footer className="bg-slate-900 text-gray-400 py-10 text-center px-4 text-sm">
           <div className="max-w-7xl mx-auto flex flex-col items-center gap-4">
-            <img src={LOGO_URL} alt="AffiliatePilot" className="h-8 w-auto opacity-80" />
+            <Image src={LOGO_URL} alt="AffiliatePilot" width={32} height={32} className="h-8 w-auto opacity-80" />
             <p>© {new Date().getFullYear()} AffiliatePilot - Smart Shopping Starts Here.</p>
             <div className="flex flex-wrap justify-center gap-4 text-xs">
               <Link href="/about" className="hover:text-white">About Us</Link>
