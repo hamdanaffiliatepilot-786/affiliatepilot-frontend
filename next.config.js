@@ -4,13 +4,13 @@ const nextConfig = {
         remotePatterns: [
             {
                 protocol: 'https',
-                hostname: '**.cjdropshipping.com', // Yeh sabhi CJ subdomains allow karega
+                hostname: '**.cjdropshipping.com',
             },
             {
                 protocol: 'https',
-                hostname: 'z-cdn-media.chatglm.cn', // Tumhara logo
+                hostname: 'z-cdn-media.chatglm.cn',
             },
         ],
     }
-};
-export default nextConfig;
+}
+module.exports = nextConfig;
