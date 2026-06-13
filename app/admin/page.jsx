@@ -7,32 +7,31 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState('');
   
-  const ADMIN_PASS = "Mrhamdu123@"; 
+  const API = process.env.NEXT_PUBLIC_API_URL;
 
-  const login = (e) => {
+  const login = async (e) => {
     e.preventDefault();
-    if(pass === ADMIN_PASS) setAuth(true); 
-    else alert("Wrong Password!");
+    try {
+      const res = await fetch(`${API}/api/admin-login`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass })
+      });
+      const data = await res.json();
+      if(data.success) setAuth(true); 
+      else alert("Wrong Password!");
+    } catch(e) { alert("Network Error"); }
   };
 
   const fetchStats = async () => {
-    setError("Fetching data... Backend might take 10 seconds to wake up.");
+    setError("Fetching data...");
     try {
-      // HARDCODED URL AND TOKEN FOR 100% GUARANTEE
-      const res = await fetch('https://pilotbot-engine.onrender.com/api/admin/stats', { 
-        headers: { 'Authorization': 'Bearer super_secret_admin_token_Mrhamdu123@' } 
+      const res = await fetch(`${API}/api/admin/stats`, { 
+        headers: { 'Authorization': `Bearer ${pass}` } 
       }); 
       const d = await res.json(); 
-      
-      if(d.success) {
-        setStats(d);
-        setError('');
-      } else {
-        setError("Backend Error: " + (d.error || "Unknown error"));
-      }
-    } catch(e) { 
-      setError("Network Error: Backend is sleeping or wrong URL. Wait 10 secs and try again."); 
-    }
+      if(d.success) { setStats(d); setError(''); }
+      else setError(d.error || "Auth Failed");
+    } catch(e) { setError("Network Error"); }
   };
 
   if (!auth) return (
@@ -48,7 +47,7 @@ export default function AdminDashboard() {
   if (!stats) return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center px-4 gap-4">
       <button onClick={fetchStats} className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-extrabold text-xl shadow-lg">Load Analytics</button>
-      {error && <p className="text-sm text-red-600 font-bold text-center max-w-md">{error}</p>}
+      {error && <p className="text-sm text-red-600 font-bold">{error}</p>}
     </div>
   );
 
@@ -68,19 +67,6 @@ export default function AdminDashboard() {
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white p-6 rounded-2xl shadow-sm border"><h2 className="font-extrabold text-lg mb-4">📈 Traffic</h2>{Object.entries(stats.trafficSources || {}).map(([k,v])=><div key={k} className="flex justify-between border-b py-2"><span className="font-bold">{k}</span><span>{v}</span></div>)}</div>
           <div className="bg-white p-6 rounded-2xl shadow-sm border"><h2 className="font-extrabold text-lg mb-4">📦 Status</h2>{Object.entries(stats.statusCounts || {}).map(([k,v])=><div key={k} className="flex justify-between border-b py-2"><span className="font-bold">{k}</span><span>{v}</span></div>)}</div>
-        </div>
-        <div className="bg-white p-6 rounded-2xl shadow-sm border">
-          <h2 className="font-extrabold text-lg mb-4">📋 Recent Orders</h2>
-          {stats.recentOrders && stats.recentOrders.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm border-collapse">
-                <thead><tr className="bg-gray-50 border-b"><th className="p-3 text-left">Order</th><th className="p-3 text-left">Product</th><th className="p-3 text-left">Sale</th><th className="p-3 text-left font-extrabold text-green-600">Profit</th><th className="p-3 text-left">Source</th></tr></thead>
-                <tbody>{stats.recentOrders.map((o,i)=><tr key={i} className="border-b"><td className="p-3 text-xs text-gray-400">{o.paypal_order_id?.substring(0,10)}</td><td className="p-3 font-bold">{o.product_name?.substring(0,25)}</td><td className="p-3">${o.price_usd}</td><td className="p-3 font-extrabold text-green-600">${o.profit_margin}</td><td className="p-3"><span className="bg-gray-100 px-2 py-1 rounded text-xs">{o.traffic_source}</span></td></tr>)}</tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-gray-400 text-sm text-center py-4">No orders yet. They will appear here automatically.</p>
-          )}
         </div>
       </div>
     </div>
