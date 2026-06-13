@@ -2,16 +2,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(process.env.NEXT_PUBLIC_SB_URL, process.env.NEXT_PUBLIC_SB_KEY);
+import { supabase } from '@/lib/supabase';
 
 export default function Home() {
   const [trending, setTrending] = useState([]);
-  const [product, setProduct] = useState('');
-  const [deals, setDeals] = useState([]);
-  const [emiResult, setEmiResult] = useState('');
-  const [currResult, setCurrResult] = useState('');
+  const [reelUrl, setReelUrl] = useState('');
+  const [reelResult, setReelResult] = useState(null);
+  const [storeName, setStoreName] = useState('');
+  const [coupons, setCoupons] = useState([]);
 
   useEffect(() => { fetchTrending(); }, []);
 
@@ -20,30 +18,30 @@ export default function Home() {
     if(data) setTrending(data);
   };
 
-  const findDeals = async (e) => {
+  // INSTAGRAM REEL FINDER TOOL
+  const findReelProduct = async (e) => {
     e.preventDefault();
+    setReelResult("🔍 AI is analyzing the reel...");
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/compare-prices`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ product })
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reel-finder`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: reelUrl })
       });
       const data = await res.json();
-      if(data.success) setDeals(data.prices);
-    } catch(e) {}
+      if(data.success) setReelResult(`🎯 Product Found: ${data.data.name} | Est. Price: $${data.data.price}`);
+    } catch(e) { setReelResult("❌ Error finding product."); }
   };
 
-  const calcEMI = (e) => {
-    e.preventDefault(); const P = parseFloat(e.target.loan.value);
-    const r = parseFloat(e.target.rate.value) / 12 / 100; const n = parseFloat(e.target.months.value);
-    if(P && r && n) { const emi = P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1); setEmiResult(`💰 Monthly EMI = ₹${emi.toFixed(2)} | Total = ₹${(emi * n).toFixed(2)}`); }
-  };
-
-  const convertCurrency = async (e) => {
-    e.preventDefault(); const amt = e.target.amount.value; const from = e.target.from.value; const to = e.target.to.value;
+  // COUPON GENERATOR TOOL
+  const generateCoupons = async (e) => {
+    e.preventDefault();
+    setCoupons(["⏳ Generating real-time coupons..."]);
     try {
-      const res = await fetch(`https://api.exchangerate-api.com/v4/latest/${from}`);
-      const data = await res.json(); const rate = data.rates[to];
-      setCurrResult(`✅ ${amt} ${from} = ${(amt * rate).toFixed(2)} ${to}`);
-    } catch(e) { setCurrResult("Error"); }
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/get-coupon`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ store: storeName })
+      });
+      const data = await res.json();
+      if(data.success) setCoupons(data.coupons.map(c => `🎟️ Code: ${c.code} | Discount: ${c.discount}`));
+    } catch(e) { setCoupons(["❌ Error generating coupons."]); }
   };
 
   return (
@@ -57,11 +55,6 @@ export default function Home() {
             <Link href="/store" className="bg-white text-gray-900 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition text-lg shadow-lg">Shop Trending 🛍️</Link>
             <a href="#tools" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg">Use Free Tools 🛠️</a>
           </div>
-          <div className="flex justify-center gap-8 mt-12 text-sm font-medium text-gray-200">
-            <span>🔒 100% Secure</span>
-            <span>🤖 AI Powered</span>
-            <span>✈️ FREE Shipping</span>
-          </div>
         </div>
       </section>
 
@@ -73,7 +66,7 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {trending.length === 0 ? (
-            <p className="text-gray-400 col-span-4 text-center py-10">⏳ AI is fetching latest products. Please wait or click import!</p>
+            <p className="text-gray-400 col-span-4 text-center py-10">⏳ AI is fetching latest products...</p>
           ) : (
             trending.map(p => (
               <Link href={`/product/${p.id}`} key={p.id} className="bg-white rounded-2xl shadow-sm border hover:shadow-xl transition group overflow-hidden">
@@ -90,44 +83,34 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TOOLS SECTION */}
+      {/* POWERFUL TOOLS SECTION (Traffic Magnets) */}
       <section id="tools" className="bg-gray-50 py-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-extrabold text-center mb-12">🛠️ Smart Shopping Tools</h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <h2 className="text-4xl font-extrabold text-center mb-12">🛠️ Viral Shopping Tools (Free)</h2>
+          <div className="grid md:grid-cols-2 gap-8">
             
+            {/* INSTAGRAM REEL PRODUCT FINDER */}
             <div className="bg-white p-6 rounded-2xl border shadow-sm">
-              <h3 className="font-bold text-xl mb-4">🔍 Price Comparison</h3>
-              <form onSubmit={findDeals} className="space-y-3">
-                <input type="text" value={product} onChange={(e)=>setProduct(e.target.value)} placeholder="e.g., iPhone 15" aria-label="Product name for comparison" className="w-full border p-3 rounded-xl outline-none" required />
-                <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700">Compare</button>
+              <h3 className="font-bold text-xl mb-2">📱 Reel Product Finder</h3>
+              <p className="text-sm text-gray-500 mb-4">Saw a cool product on Instagram Reel? Paste the link & our AI will find it for you at the lowest price!</p>
+              <form onSubmit={findReelProduct} className="space-y-3">
+                <input type="text" value={reelUrl} onChange={(e)=>setReelUrl(e.target.value)} placeholder="Paste Instagram Reel Link..." className="w-full border p-3 rounded-xl outline-none" required />
+                <button type="submit" className="w-full bg-pink-600 text-white p-3 rounded-xl font-bold hover:bg-pink-700">Find Product 🔍</button>
               </form>
-              {deals.length > 0 && <div className="mt-4 max-h-40 overflow-auto">{deals.slice(0,3).map((d, i) => <div key={i} className="flex justify-between text-sm border-b py-2"><span className="font-bold">{d.store}</span><a href={d.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Visit</a></div>)}</div>}
+              {reelResult && <p className="mt-3 text-sm bg-pink-50 p-3 rounded-xl border font-medium">{reelResult}</p>}
             </div>
 
+            {/* COUPON GENERATOR */}
             <div className="bg-white p-6 rounded-2xl border shadow-sm">
-              <h3 className="font-bold text-xl mb-4">💳 EMI Calculator</h3>
-              <form onSubmit={calcEMI} className="space-y-3">
-                <input name="loan" type="number" placeholder="Loan Amount (₹)" aria-label="Loan Amount" className="w-full border p-3 rounded-xl outline-none" required />
-                <input name="rate" type="number" placeholder="Interest Rate (%)" aria-label="Interest Rate" className="w-full border p-3 rounded-xl outline-none" required />
-                <input name="months" type="number" placeholder="Tenure (Months)" aria-label="Tenure in Months" className="w-full border p-3 rounded-xl outline-none" required />
-                <button type="submit" className="w-full bg-purple-600 text-white p-3 rounded-xl font-bold hover:bg-purple-700">Calculate</button>
+              <h3 className="font-bold text-xl mb-2">🎟️ AI Coupon Generator</h3>
+              <p className="text-sm text-gray-500 mb-4">Don't pay full price! Enter store name and our AI will find hidden discount codes for you.</p>
+              <form onSubmit={generateCoupons} className="space-y-3">
+                <input type="text" value={storeName} onChange={(e)=>setStoreName(e.target.value)} placeholder="e.g., Amazon, Flipkart, Myntra" className="w-full border p-3 rounded-xl outline-none" required />
+                <button type="submit" className="w-full bg-green-600 text-white p-3 rounded-xl font-bold hover:bg-green-700">Get Coupons 💸</button>
               </form>
-              {emiResult && <p className="mt-3 text-sm bg-purple-50 p-3 rounded-xl border">{emiResult}</p>}
+              {coupons.length > 0 && <div className="mt-3 space-y-2">{coupons.map((c, i) => <p key={i} className="text-sm bg-green-50 p-2 rounded border">{c}</p>)}</div>}
             </div>
 
-            <div className="bg-white p-6 rounded-2xl border shadow-sm">
-              <h3 className="font-bold text-xl mb-4">💱 Currency Converter</h3>
-              <form onSubmit={convertCurrency} className="space-y-3">
-                <input name="amount" type="number" defaultValue="100" aria-label="Currency Amount" className="w-full border p-3 rounded-xl outline-none" required />
-                <div className="flex gap-2">
-                  <select name="from" aria-label="Convert from currency" className="w-1/2 border p-3 rounded-xl outline-none"><option>USD</option><option>EUR</option></select>
-                  <select name="to" aria-label="Convert to currency" className="w-1/2 border p-3 rounded-xl outline-none"><option>INR</option><option>USD</option></select>
-                </div>
-                <button type="submit" className="w-full bg-green-600 text-white p-3 rounded-xl font-bold hover:bg-green-700">Convert</button>
-              </form>
-              {currResult && <p className="mt-3 text-sm bg-green-50 p-3 rounded-xl border">{currResult}</p>}
-            </div>
           </div>
         </div>
       </section>
