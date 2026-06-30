@@ -29,37 +29,74 @@ function LiveUserCount() {
   return <span>{count}</span>;
 }
 
+// Loads the PayPal JS SDK once and reuses it across modal opens.
+let paypalSdkPromise = null;
+function loadPayPalSdk(clientId) {
+  if (window.paypal) return Promise.resolve(window.paypal);
+  if (paypalSdkPromise) return paypalSdkPromise;
+  paypalSdkPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=capture`;
+    script.onload = () => resolve(window.paypal);
+    script.onerror = () => reject(new Error("Failed to load PayPal SDK"));
+    document.body.appendChild(script);
+  });
+  return paypalSdkPromise;
+}
+
 function HireModal({ staff, onClose }) {
   const { token } = useAuth();
   const [err, setErr] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [done, setDone] = useState(false);
+  const buttonsRef = useState(() => ({ current: null }))[0];
+  const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID || "";
 
-  const API = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+  useEffect(() => {
+    if (!token || !paypalClientId || done) return;
+    let cancelled = false;
 
-  const handlePayPalClick = async () => {
-    if (!token) { setErr("Please login to subscribe."); return; }
-    if (!API) { setErr("API URL is missing."); return; }
+    loadPayPalSdk(paypalClientId)
+      .then((paypal) => {
+        if (cancelled || !buttonsRef.current) return;
+        buttonsRef.current.innerHTML = "";
 
-    setProcessing(true);
-    setErr("");
-    try {
-      const response = await fetch(`${API}/api/create-paypal-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ agentId: staff.id, price: staff.price, name: staff.name }),
-      });
-      const result = await response.json().catch(() => ({}));
-      if (result.approvalUrl) {
-        window.location.href = result.approvalUrl;
-      } else {
-        setErr(result.error || "Could not create PayPal order. Contact support.");
-      }
-    } catch {
-      setErr("Network error. Please try again.");
-    } finally {
-      setProcessing(false);
-    }
-  };
+        paypal.Buttons({
+          style: { layout: "vertical", color: "blue", shape: "pill", label: "paypal" },
+          createOrder: (data, actions) => actions.order.create({
+            intent: "CAPTURE",
+            purchase_units: [{
+              description: `${staff.name} - PilotStaff AI Staff`,
+              amount: { currency_code: "USD", value: String(staff.price) },
+            }],
+          }),
+          onApprove: async (data, actions) => {
+            setProcessing(true);
+            setErr("");
+            try {
+              await actions.order.capture();
+              const result = await apiRequest("/api/subscribe", {
+                method: "POST",
+                body: { agentId: staff.id, paypalOrderId: data.orderID },
+              });
+              if (result?.success === false) {
+                setErr(result.error || "Payment captured but activation failed. Contact support.");
+              } else {
+                setDone(true);
+              }
+            } catch (e) {
+              setErr(e?.message || "Could not verify payment. Contact support with your PayPal receipt.");
+            } finally {
+              setProcessing(false);
+            }
+          },
+          onError: () => setErr("PayPal encountered an error. Please try again."),
+        }).render(buttonsRef.current);
+      })
+      .catch(() => setErr("Could not load PayPal. Please refresh and try again."));
+
+    return () => { cancelled = true; };
+  }, [token, paypalClientId, done]);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => !processing && onClose()}>
@@ -80,10 +117,15 @@ function HireModal({ staff, onClose }) {
               <p className="text-sm text-slate-600 mb-4">Please login to hire AI staff.</p>
               <Link href="/login" className="btn-primary px-6 py-3 rounded-xl text-sm inline-block">Login to Continue</Link>
             </div>
+          ) : !paypalClientId ? (
+            <div className="text-sm text-red-600 text-center">PayPal is not configured. Add VITE_PAYPAL_CLIENT_ID in environment variables.</div>
+          ) : done ? (
+            <div className="text-center text-emerald-600 text-sm font-semibold">✅ Subscribed! Refresh your dashboard to start using {staff.name}.</div>
           ) : (
-            <button onClick={handlePayPalClick} disabled={processing} className="w-full bg-[#0070ba] hover:bg-[#005ea6] disabled:opacity-60 text-white py-3 rounded-xl text-sm font-bold transition">
-              {processing ? "Processing..." : "Subscribe via PayPal"}
-            </button>
+            <>
+              <div ref={(el) => (buttonsRef.current = el)} />
+              {processing && <p className="text-center text-xs text-slate-500 mt-2">Verifying payment...</p>}
+            </>
           )}
 
           {err && (
