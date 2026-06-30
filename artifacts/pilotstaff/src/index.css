@@ -1,0 +1,188 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+}
+
+:root {
+  --app-font-sans: 'Inter', system-ui, sans-serif;
+  --app-font-serif: Georgia, serif;
+  --app-font-mono: Menlo, monospace;
+}
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #ffffff;
+    color: #0f172a;
+  }
+}
+
+@layer utilities {
+  /* ─── PilotStaff Utility Classes ─── */
+
+  .btn-primary {
+    display: inline-block;
+    background-color: #2563eb;
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  }
+
+  .btn-primary:hover {
+    background-color: #1d4ed8;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-outline {
+    display: inline-block;
+    background-color: transparent;
+    color: #334155;
+    font-weight: 600;
+    border: 2px solid #e2e8f0;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+  }
+
+  .btn-outline:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+    background-color: #eff6ff;
+  }
+
+  .card {
+    display: block;
+    background-color: #ffffff;
+    border-radius: 1rem;
+    border: 1.5px solid #e2e8f0;
+    transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    line-height: 1;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── Prose output styling for AI-generated content ─── */
+  .prose-output {
+    line-height: 1.7;
+    color: #334155;
+  }
+
+  .prose-output h1,
+  .prose-output h2,
+  .prose-output h3,
+  .prose-output h4 {
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .prose-output h1 { font-size: 1.5rem; }
+  .prose-output h2 { font-size: 1.25rem; }
+  .prose-output h3 { font-size: 1.1rem; }
+
+  .prose-output p {
+    margin-bottom: 1em;
+  }
+
+  .prose-output ul,
+  .prose-output ol {
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+  }
+
+  .prose-output li {
+    margin-bottom: 0.35em;
+  }
+
+  .prose-output strong {
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .prose-output a {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+
+  .prose-output pre {
+    background: #f1f5f9;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    margin-bottom: 1em;
+  }
+
+  .prose-output code {
+    background: #f1f5f9;
+    padding: 0.15em 0.4em;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+    font-family: Menlo, monospace;
+  }
+
+  /* ─── Animations ─── */
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .animate-pulse-dot {
+    animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Hide ugly search cancel button */
+  input[type="search"]::-webkit-search-cancel-button {
+    display: none;
+  }
+}
