@@ -1,4 +1,5 @@
 import { Link } from 'wouter';
+import { aiImage } from '../lib/genImage';
 import SocialProofBar from '../components/home/SocialProofBar';
 import FreeToolsSection from '../components/home/FreeToolsSection';
 import AiStaffSection from '../components/home/AiStaffSection';
@@ -10,27 +11,27 @@ import ReferralCtaSection from '../components/home/ReferralCtaSection';
 import FinalCtaSection from '../components/home/FinalCtaSection';
 
 const TOP_TOOLS = [
-  { slug: 'ai-humanizer', icon: '✍️', name: 'AI Humanizer', desc: 'Remove AI detection from any text instantly', badge: 'Viral' },
-  { slug: 'seo-audit-checker', icon: '🔍', name: 'SEO Audit Checker', desc: 'Get a complete SEO score and fix list', badge: 'New' },
-  { slug: 'ai-website-builder', icon: '🌐', name: 'AI Website Builder', desc: 'Build complete websites in 10 seconds', badge: 'Popular' },
-  { slug: 'ai-blog-writer', icon: '📝', name: 'AI Blog Writer', desc: '1500-word SEO articles instantly', badge: 'New' },
-  { slug: 'ai-image-generator', icon: '🖼️', name: 'AI Image Generator', desc: 'Text to stunning images free', badge: 'Free' },
-  { slug: 'youtube-to-blog', icon: '🎬', name: 'YouTube to Blog', desc: 'Convert any video into a blog post', badge: 'New' },
-  { slug: 'ai-logo-maker', icon: '🎨', name: 'AI Logo Maker', desc: 'Professional logos in seconds' },
-  { slug: 'business-name-generator', icon: '💡', name: 'Business Name Generator', desc: 'Catchy startup names with domains' },
-  { slug: 'meta-tag-generator', icon: '🏷️', name: 'Meta Tag Generator', desc: 'Perfect SEO meta tags' },
+  { slug: 'ai-humanizer', icon: '✍️', name: 'AI Humanizer', desc: 'Remove AI detection from any text instantly', badge: 'Viral', image: aiImage('robot rewriting text into natural human handwriting, warm lighting, digital illustration', 401, 500) },
+  { slug: 'seo-audit-checker', icon: '🔍', name: 'SEO Audit Checker', desc: 'Get a complete SEO score and fix list', badge: 'New', image: aiImage('magnifying glass over a website SEO score dashboard, blue gradient illustration', 402, 500) },
+  { slug: 'ai-website-builder', icon: '🌐', name: 'AI Website Builder', desc: 'Build complete websites in 10 seconds', badge: 'Popular', image: aiImage('website layout assembling from glowing blocks instantly, futuristic UI illustration', 403, 500) },
+  { slug: 'ai-blog-writer', icon: '📝', name: 'AI Blog Writer', desc: '1500-word SEO articles instantly', badge: 'New', image: aiImage('glowing pen writing a long blog article on paper, cozy illustration', 404, 500) },
+  { slug: 'ai-image-generator', icon: '🖼️', name: 'AI Image Generator', desc: 'Text to stunning images free', badge: 'Free', image: aiImage('colorful abstract artwork emerging from a paintbrush made of light, creative illustration', 405, 500) },
+  { slug: 'youtube-to-blog', icon: '🎬', name: 'YouTube to Blog', desc: 'Convert any video into a blog post', badge: 'New', image: aiImage('video play button transforming into a document with text, clean illustration', 406, 500) },
+  { slug: 'ai-logo-maker', icon: '🎨', name: 'AI Logo Maker', desc: 'Professional logos in seconds', image: aiImage('colorful geometric logo shapes floating above a design canvas, illustration', 407, 500) },
+  { slug: 'business-name-generator', icon: '💡', name: 'Business Name Generator', desc: 'Catchy startup names with domains', image: aiImage('glowing lightbulb with startup name tags floating around it, illustration', 408, 500) },
+  { slug: 'meta-tag-generator', icon: '🏷️', name: 'Meta Tag Generator', desc: 'Perfect SEO meta tags', image: aiImage('browser tab with glowing SEO tags and labels, clean tech illustration', 409, 500) },
 ];
 
 const AI_STAFF = [
-  { icon: '📝', name: 'AI Content Writer', price: 19, desc: 'Blogs, articles, social posts 24/7', tasks: ['Blog posts', 'Social media', 'Newsletters', 'Product descriptions'] },
-  { icon: '🔍', name: 'AI SEO Expert', price: 39, desc: 'Audits sites, finds keywords, ranks pages', tasks: ['Site audits', 'Keyword research', 'Meta optimization', 'Rank tracking'] },
-  { icon: '📱', name: 'AI Social Manager', price: 29, desc: 'Creates and schedules content automatically', tasks: ['Content calendar', 'Auto-posting', 'Hashtag research', 'Analytics'] },
-  { icon: '📧', name: 'AI Email Marketer', price: 29, desc: 'Writes email sequences that convert', tasks: ['Drip campaigns', 'Newsletters', 'Subject lines', 'Follow-ups'] },
-  { icon: '🎧', name: 'AI Support Agent', price: 29, desc: '24/7 customer support chatbot', tasks: ['Live chat', 'FAQ answers', 'Ticket routing', 'Multi-language'] },
-  { icon: '🎬', name: 'AI Video Scriptwriter', price: 19, desc: 'Viral scripts for YouTube and Reels', tasks: ['YouTube scripts', 'TikTok hooks', 'Video outlines', 'Titles'] },
-  { icon: '🎯', name: 'Funnel Architect', price: 49, desc: 'Build $10M+ conversion funnels', tasks: ['Traffic strategy', 'Lead magnets', 'Email sequences', 'Close pages'], premium: true },
-  { icon: '📈', name: 'LinkedIn Growth Hacker', price: 49, desc: 'Build personal brand that generates leads', tasks: ['Profile optimization', 'Viral posts', 'DM scripts', 'Daily routine'], premium: true },
-  { icon: '⭐', name: 'Reputation Manager', price: 39, desc: 'Protect and grow your online reputation', tasks: ['Review acquisition', 'Negative burial', 'Response templates', 'Social listening'], premium: true },
+  { icon: '📝', name: 'AI Content Writer', price: 19, desc: 'Blogs, articles, social posts 24/7', tasks: ['Blog posts', 'Social media', 'Newsletters', 'Product descriptions'], image: aiImage('AI writer robot typing an article on a glowing laptop, friendly illustration', 501, 500) },
+  { icon: '🔍', name: 'AI SEO Expert', price: 39, desc: 'Audits sites, finds keywords, ranks pages', tasks: ['Site audits', 'Keyword research', 'Meta optimization', 'Rank tracking'], image: aiImage('AI analyst studying a glowing SEO ranking dashboard, professional illustration', 502, 500) },
+  { icon: '📱', name: 'AI Social Manager', price: 29, desc: 'Creates and schedules content automatically', tasks: ['Content calendar', 'Auto-posting', 'Hashtag research', 'Analytics'], image: aiImage('AI hand posting colorful social media cards around a phone, vibrant illustration', 503, 500) },
+  { icon: '📧', name: 'AI Email Marketer', price: 29, desc: 'Writes email sequences that convert', tasks: ['Drip campaigns', 'Newsletters', 'Subject lines', 'Follow-ups'], image: aiImage('AI hand composing glowing email envelopes flying to inboxes, clean illustration', 504, 500) },
+  { icon: '🎧', name: 'AI Support Agent', price: 29, desc: '24/7 customer support chatbot', tasks: ['Live chat', 'FAQ answers', 'Ticket routing', 'Multi-language'], image: aiImage('AI support headset icon glowing above a chat bubble, calm blue illustration', 505, 500) },
+  { icon: '🎬', name: 'AI Video Scriptwriter', price: 19, desc: 'Viral scripts for YouTube and Reels', tasks: ['YouTube scripts', 'TikTok hooks', 'Video outlines', 'Titles'], image: aiImage('AI film clapperboard with glowing script pages, creative studio illustration', 506, 500) },
+  { icon: '🎯', name: 'Funnel Architect', price: 49, desc: 'Build $10M+ conversion funnels', tasks: ['Traffic strategy', 'Lead magnets', 'Email sequences', 'Close pages'], premium: true, image: aiImage('glowing sales funnel diagram with traffic flowing to a conversion point, tech illustration', 507, 500) },
+  { icon: '📈', name: 'LinkedIn Growth Hacker', price: 49, desc: 'Build personal brand that generates leads', tasks: ['Profile optimization', 'Viral posts', 'DM scripts', 'Daily routine'], premium: true, image: aiImage('professional AI avatar growing a network of glowing connection nodes, corporate illustration', 508, 500) },
+  { icon: '⭐', name: 'Reputation Manager', price: 39, desc: 'Protect and grow your online reputation', tasks: ['Review acquisition', 'Negative burial', 'Response templates', 'Social listening'], premium: true, image: aiImage('AI shield protecting a five star rating icon, illustration', 509, 500) },
 ];
 
 const COMPARISON = [
@@ -60,32 +61,41 @@ const PRICING_PLANS = [
   { name: 'Agency', price: '$99', period: '/mo', cta: 'Subscribe via PayPal', href: '/pricing', highlight: false },
 ];
 
+const HERO_IMAGE = aiImage('futuristic team of friendly AI robot employees working together in a bright modern office, dashboard screens, optimistic illustration', 1, 1200);
+
 function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/80 via-white to-white">
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-200/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-violet-200/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 relative">
-        <div className="text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold mb-8">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse-dot"></span>
-            77+ Free AI Tools — No Login Required
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold mb-8">
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse-dot"></span>
+              77+ Free AI Tools — No Login Required
+            </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-6 tracking-tight">
+              Hire <span className="gradient-text">AI Employees</span> for Your Business
+            </h1>
+            <p className="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto lg:mx-0 mb-10 leading-relaxed">
+              Stop paying $5,000/month for freelancers. AI employees work 24/7, never sleep, and cost a fraction of the price.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+              <Link href="/staff" className="btn-primary px-8 py-4 rounded-2xl text-lg inline-flex items-center justify-center gap-2">
+                Hire AI Staff →
+              </Link>
+              <Link href="/tools" className="btn-outline px-8 py-4 rounded-2xl text-lg inline-flex items-center justify-center gap-2">
+                Try Free Tools
+              </Link>
+            </div>
+            <p className="text-sm text-slate-400">No credit card · Free forever plan · Cancel anytime</p>
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-6 tracking-tight">
-            Hire <span className="gradient-text">AI Employees</span><br />for Your Business
-          </h1>
-          <p className="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Stop paying $5,000/month for freelancers. AI employees work 24/7, never sleep, and cost a fraction of the price.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Link href="/staff" className="btn-primary px-8 py-4 rounded-2xl text-lg inline-flex items-center justify-center gap-2">
-              Hire AI Staff →
-            </Link>
-            <Link href="/tools" className="btn-outline px-8 py-4 rounded-2xl text-lg inline-flex items-center justify-center gap-2">
-              Try Free Tools
-            </Link>
+          <div className="relative">
+            <div className="rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
+              <img src={HERO_IMAGE} alt="AI employees working for your business" className="w-full h-full object-cover" />
+            </div>
           </div>
-          <p className="text-sm text-slate-400">No credit card · Free forever plan · Cancel anytime</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto mt-16">
           {STATS.map(s => (
