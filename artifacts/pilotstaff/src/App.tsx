@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
+import { useEffect } from "react";
 import { AuthProvider } from "./lib/authContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -25,6 +26,17 @@ import VerifyEmail from "./pages/VerifyEmail";
 import Contact from "./pages/Contact";
 import Careers from "./pages/Careers";
 import Changelog from "./pages/Changelog";
+
+// Fixes: pages opening scrolled to the bottom instead of the top.
+// wouter (like most SPA routers) doesn't reset scroll position on navigation
+// by default — the browser keeps whatever scroll offset the previous page had.
+function ScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+  return null;
+}
 
 function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -84,6 +96,7 @@ function Router() {
 export default function App() {
   return (
     <AuthProvider>
+      <ScrollToTop />
       <Router />
     </AuthProvider>
   );
