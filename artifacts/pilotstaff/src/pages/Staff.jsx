@@ -2,19 +2,20 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { apiRequest } from "../lib/api";
 import { useAuth } from "../lib/authContext";
+import { aiImage } from "../lib/genImage";
 
 const AI_STAFF = [
-  { id: "receptionist", icon: "🤵", name: "AI Receptionist", price: 19, color: "from-blue-500 to-cyan-500", endpoint: "/api/agent/receptionist", demoType: "chat", desc: "Greets visitors, answers questions, qualifies leads, books appointments 24/7.", tasks: ["Answers 100+ questions instantly", "Qualifies leads automatically", "Books appointments in chat", "Collects name, phone, email", "Works in English, Hindi, Hinglish", "Escalates complex queries"], useCases: ["Clinics", "Real Estate", "Coaching Centers", "Salons", "Gyms", "Consulting"], demoPlaceholder: "Hi, I want to book an appointment for consultation" },
-  { id: "sales-agent", icon: "🤝", name: "AI Sales Agent", price: 29, color: "from-emerald-500 to-teal-500", endpoint: "/api/agent/sales-agent", demoType: "chat", desc: "Qualifies leads, handles objections, sends follow-ups, and closes deals.", tasks: ["Qualifies with 5 questions", "Handles price objections", "Sends follow-up sequences", "Creates urgency", "Tracks deal stage", "Sends payment links"], useCases: ["SaaS", "Course Sellers", "E-commerce", "Agencies", "Coaches"], demoPlaceholder: "I run a digital marketing agency, tell me your pricing" },
-  { id: "support-agent", icon: "🎧", name: "AI Support Agent", price: 29, color: "from-violet-500 to-purple-500", endpoint: "/api/agent/support-agent", demoType: "chat", desc: "Resolves complaints, processes refunds, tracks tickets 24/7.", tasks: ["Resolves 80% without human", "Processes refunds", "Creates tickets", "Step-by-step solutions", "Handles angry customers", "Escalates when needed"], useCases: ["E-commerce", "SaaS", "Apps", "Subscriptions", "Digital Products"], demoPlaceholder: "I ordered but haven't received it. Order #12345" },
-  { id: "social-staff", icon: "📱", name: "AI Social Staff", price: 29, color: "from-pink-500 to-rose-500", endpoint: "/api/agent/social-staff", demoType: "content", desc: "Creates daily content for Instagram, Twitter, LinkedIn.", tasks: ["7 days content at once", "Platform-specific format", "Finds trending hashtags", "Suggests best times", "Engages with comments", "Tracks metrics"], useCases: ["Brands", "Influencers", "E-commerce", "Restaurants", "Fitness"], demoPlaceholder: "My business is a cafe in Mumbai targeting young professionals" },
-  { id: "content-writer", icon: "✍️", name: "AI Content Writer", price: 19, color: "from-amber-500 to-orange-500", endpoint: "/api/agent/content-writer", demoType: "content", desc: "Writes SEO blogs, product descriptions, email sequences on demand.", tasks: ["1500+ word SEO articles", "Product descriptions", "Email sequences", "Ad copies", "Repurposes to 5 formats", "Auto-publishes to blog"], useCases: ["Bloggers", "Affiliate Marketers", "E-commerce", "SaaS", "News Sites"], demoPlaceholder: "Write a blog about best AI tools for small businesses 2025" },
-  { id: "seo-expert", icon: "🔍", name: "AI SEO Expert", price: 39, color: "from-red-500 to-pink-500", endpoint: "/api/agent/seo-expert", demoType: "content", desc: "Finds keywords, audits website, creates content strategy.", tasks: ["20+ keywords with difficulty", "Complete SEO audit", "Technical analysis", "Content gap identification", "Backlink strategy", "Monthly roadmap"], useCases: ["New Websites", "Dropping Rankings", "Local Business", "E-commerce", "Bloggers"], demoPlaceholder: "My website is example.com, I sell organic skincare in India" },
-  { id: "conversion-funnel-architect", icon: "🎯", name: "Conversion Funnel Architect", price: 49, color: "from-indigo-500 to-blue-600", endpoint: "/api/agent/conversion-funnel-architect", demoType: "content", desc: "Builds $10M+ funnels with traffic strategy, lead magnets, email sequences, and close pages.", tasks: ["Traffic source strategy", "Irresistible lead magnets", "Landing page structure", "Email nurture sequences", "The close & upsell", "Metrics at each step"], useCases: ["Course Creators", "SaaS", "E-commerce", "Coaches", "Agencies"], demoPlaceholder: "Create a funnel for my $997 coaching program targeting entrepreneurs", premium: true },
-  { id: "linkedin-growth-hacker", icon: "📈", name: "LinkedIn Growth Hacker", price: 49, color: "from-sky-500 to-indigo-500", endpoint: "/api/agent/linkedin-growth-hacker", demoType: "content", desc: "Builds personal brands for founders that generate inbound leads.", tasks: ["Profile optimization", "3 content pillars", "5 viral post frameworks", "DM outreach scripts", "15-min daily routine", "Connection strategy"], useCases: ["Founders", "Consultants", "B2B Sales", "Agency Owners", "Executives"], demoPlaceholder: "I am a SaaS founder wanting to build authority and get inbound leads on LinkedIn", premium: true },
-  { id: "reputation-manager", icon: "⭐", name: "Reputation Manager", price: 39, color: "from-amber-400 to-yellow-500", endpoint: "/api/agent/reputation-manager", demoType: "content", desc: "Protects brands online. Gets 5-star reviews, buries negatives.", tasks: ["5-star review templates", "Negative review burial", "Review response templates", "Social listening setup", "ORM strategy", "Crisis management"], useCases: ["Restaurants", "Clinics", "Agencies", "E-commerce", "Local Business"], demoPlaceholder: "I got a 1-star review on Google that is hurting my business. Help me respond and bury it.", premium: true },
-  { id: "email-marketer", icon: "📧", name: "AI Email Marketer", price: 39, color: "from-cyan-500 to-blue-500", endpoint: "/api/agent/email-marketer", demoType: "content", desc: "Runs end-to-end email campaigns: sequences, newsletters, automations.", tasks: ["Full email sequence strategy", "Subject lines that get opened", "Segmentation recommendations", "A/B test ideas for emails", "Re-engagement campaigns", "Newsletter content calendar"], useCases: ["SaaS", "E-commerce", "Coaches", "Course Creators", "Newsletters"], demoPlaceholder: "Create a 5-email welcome sequence for my SaaS product targeting freelancers", premium: true },
-  { id: "video-scriptwriter", icon: "🎬", name: "AI Video Scriptwriter", price: 29, color: "from-rose-500 to-red-500", endpoint: "/api/agent/video-scriptwriter", demoType: "content", desc: "Writes scripts for YouTube, TikTok, Instagram Reels, and ads.", tasks: ["YouTube long-form scripts", "TikTok & Reels hooks", "YouTube Shorts scripts", "Video ad scripts (15/30/60s)", "Podcast episode outlines", "Viral hook formulas"], useCases: ["YouTubers", "Coaches", "E-commerce Brands", "Agencies", "Course Creators"], demoPlaceholder: "Write a YouTube script: Top 10 AI tools for small businesses in 2025" },
+  { id: "receptionist", icon: "🤵", name: "AI Receptionist", price: 19, color: "from-blue-500 to-cyan-500", endpoint: "/api/agent/receptionist", demoType: "chat", desc: "Greets visitors, answers questions, qualifies leads, books appointments 24/7.", tasks: ["Answers 100+ questions instantly", "Qualifies leads automatically", "Books appointments in chat", "Collects name, phone, email", "Works in English, Hindi, Hinglish", "Escalates complex queries"], useCases: ["Clinics", "Real Estate", "Coaching Centers", "Salons", "Gyms", "Consulting"], demoPlaceholder: "Hi, I want to book an appointment for consultation", image: aiImage("friendly AI robot receptionist at a front desk welcoming a visitor, warm modern office, illustration", 601) },
+  { id: "sales-agent", icon: "🤝", name: "AI Sales Agent", price: 29, color: "from-emerald-500 to-teal-500", endpoint: "/api/agent/sales-agent", demoType: "chat", desc: "Qualifies leads, handles objections, sends follow-ups, and closes deals.", tasks: ["Qualifies with 5 questions", "Handles price objections", "Sends follow-up sequences", "Creates urgency", "Tracks deal stage", "Sends payment links"], useCases: ["SaaS", "Course Sellers", "E-commerce", "Agencies", "Coaches"], demoPlaceholder: "I run a digital marketing agency, tell me your pricing", image: aiImage("AI salesperson hologram shaking hands with a client over a glowing deal, futuristic illustration", 602) },
+  { id: "support-agent", icon: "🎧", name: "AI Support Agent", price: 29, color: "from-violet-500 to-purple-500", endpoint: "/api/agent/support-agent", demoType: "chat", desc: "Resolves complaints, processes refunds, tracks tickets 24/7.", tasks: ["Resolves 80% without human", "Processes refunds", "Creates tickets", "Step-by-step solutions", "Handles angry customers", "Escalates when needed"], useCases: ["E-commerce", "SaaS", "Apps", "Subscriptions", "Digital Products"], demoPlaceholder: "I ordered but haven't received it. Order #12345", image: aiImage("AI support agent headset icon glowing above a customer service chat bubble, calm blue illustration", 603) },
+  { id: "social-staff", icon: "📱", name: "AI Social Staff", price: 29, color: "from-pink-500 to-rose-500", endpoint: "/api/agent/social-staff", demoType: "content", desc: "Creates daily content for Instagram, Twitter, LinkedIn.", tasks: ["7 days content at once", "Platform-specific format", "Finds trending hashtags", "Suggests best times", "Engages with comments", "Tracks metrics"], useCases: ["Brands", "Influencers", "E-commerce", "Restaurants", "Fitness"], demoPlaceholder: "My business is a cafe in Mumbai targeting young professionals", image: aiImage("AI hand posting colorful social media content cards floating around a phone, vibrant illustration", 604) },
+  { id: "content-writer", icon: "✍️", name: "AI Content Writer", price: 19, color: "from-amber-500 to-orange-500", endpoint: "/api/agent/content-writer", demoType: "content", desc: "Writes SEO blogs, product descriptions, email sequences on demand.", tasks: ["1500+ word SEO articles", "Product descriptions", "Email sequences", "Ad copies", "Repurposes to 5 formats", "Auto-publishes to blog"], useCases: ["Bloggers", "Affiliate Marketers", "E-commerce", "SaaS", "News Sites"], demoPlaceholder: "Write a blog about best AI tools for small businesses 2025", image: aiImage("AI pen writing a long article on a glowing scroll of paper, cozy library background, illustration", 605) },
+  { id: "seo-expert", icon: "🔍", name: "AI SEO Expert", price: 39, color: "from-red-500 to-pink-500", endpoint: "/api/agent/seo-expert", demoType: "content", desc: "Finds keywords, audits website, creates content strategy.", tasks: ["20+ keywords with difficulty", "Complete SEO audit", "Technical analysis", "Content gap identification", "Backlink strategy", "Monthly roadmap"], useCases: ["New Websites", "Dropping Rankings", "Local Business", "E-commerce", "Bloggers"], demoPlaceholder: "My website is example.com, I sell organic skincare in India", image: aiImage("AI analyst studying a glowing SEO dashboard with charts and keyword graphs, professional illustration", 606) },
+  { id: "conversion-funnel-architect", icon: "🎯", name: "Conversion Funnel Architect", price: 49, color: "from-indigo-500 to-blue-600", endpoint: "/api/agent/conversion-funnel-architect", demoType: "content", desc: "Builds $10M+ funnels with traffic strategy, lead magnets, email sequences, and close pages.", tasks: ["Traffic source strategy", "Irresistible lead magnets", "Landing page structure", "Email nurture sequences", "The close & upsell", "Metrics at each step"], useCases: ["Course Creators", "SaaS", "E-commerce", "Coaches", "Agencies"], demoPlaceholder: "Create a funnel for my $997 coaching program targeting entrepreneurs", premium: true, image: aiImage("glowing sales funnel diagram with traffic flowing into a conversion point, tech illustration", 607) },
+  { id: "linkedin-growth-hacker", icon: "📈", name: "LinkedIn Growth Hacker", price: 49, color: "from-sky-500 to-indigo-500", endpoint: "/api/agent/linkedin-growth-hacker", demoType: "content", desc: "Builds personal brands for founders that generate inbound leads.", tasks: ["Profile optimization", "3 content pillars", "5 viral post frameworks", "DM outreach scripts", "15-min daily routine", "Connection strategy"], useCases: ["Founders", "Consultants", "B2B Sales", "Agency Owners", "Executives"], demoPlaceholder: "I am a SaaS founder wanting to build authority and get inbound leads on LinkedIn", premium: true, image: aiImage("professional AI avatar growing a LinkedIn network of glowing connection nodes, blue corporate illustration", 608) },
+  { id: "reputation-manager", icon: "⭐", name: "Reputation Manager", price: 39, color: "from-amber-400 to-yellow-500", endpoint: "/api/agent/reputation-manager", demoType: "content", desc: "Protects brands online. Gets 5-star reviews, buries negatives.", tasks: ["5-star review templates", "Negative review burial", "Review response templates", "Social listening setup", "ORM strategy", "Crisis management"], useCases: ["Restaurants", "Clinics", "Agencies", "E-commerce", "Local Business"], demoPlaceholder: "I got a 1-star review on Google that is hurting my business. Help me respond and bury it.", premium: true, image: aiImage("AI shield protecting a five star rating from falling negative review icons, illustration", 609) },
+  { id: "email-marketer", icon: "📧", name: "AI Email Marketer", price: 39, color: "from-cyan-500 to-blue-500", endpoint: "/api/agent/email-marketer", demoType: "content", desc: "Runs end-to-end email campaigns: sequences, newsletters, automations.", tasks: ["Full email sequence strategy", "Subject lines that get opened", "Segmentation recommendations", "A/B test ideas for emails", "Re-engagement campaigns", "Newsletter content calendar"], useCases: ["SaaS", "E-commerce", "Coaches", "Course Creators", "Newsletters"], demoPlaceholder: "Create a 5-email welcome sequence for my SaaS product targeting freelancers", premium: true, image: aiImage("AI hand composing glowing email envelopes flying toward inboxes, clean modern illustration", 610) },
+  { id: "video-scriptwriter", icon: "🎬", name: "AI Video Scriptwriter", price: 29, color: "from-rose-500 to-red-500", endpoint: "/api/agent/video-scriptwriter", demoType: "content", desc: "Writes scripts for YouTube, TikTok, Instagram Reels, and ads.", tasks: ["YouTube long-form scripts", "TikTok & Reels hooks", "YouTube Shorts scripts", "Video ad scripts (15/30/60s)", "Podcast episode outlines", "Viral hook formulas"], useCases: ["YouTubers", "Coaches", "E-commerce Brands", "Agencies", "Course Creators"], demoPlaceholder: "Write a YouTube script: Top 10 AI tools for small businesses in 2025", image: aiImage("AI film clapperboard with glowing script pages and a play button, creative studio illustration", 611) },
 ];
 
 function LiveUserCount() {
@@ -105,9 +106,15 @@ function HireModal({ staff, onClose }) {
         <button onClick={() => !processing && onClose()} disabled={processing} className="absolute top-4 right-5 text-slate-400 hover:text-slate-600 text-2xl disabled:opacity-40">×</button>
 
         <div className="text-center mb-6">
-          <span className="text-5xl block mb-3">{staff.icon}</span>
+          {staff.image ? (
+            <div className="w-20 h-20 rounded-2xl overflow-hidden mx-auto mb-3 border border-slate-200">
+              <img src={staff.image} alt={staff.name} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <span className="text-5xl block mb-3">{staff.icon}</span>
+          )}
           <h2 className="text-xl font-extrabold text-slate-900">{staff.name}</h2>
-          <p className="text-4xl font-extrabold mt-3">${staff.price}<span className="text-base text-slate-400 font-normal">/mo</span></p>
+          <p className="text-4xl font-extrabold mt-3 text-slate-900">${staff.price}<span className="text-base text-slate-400 font-normal">/mo</span></p>
           <p className="text-sm text-slate-500 mt-2">Secure payment via PayPal · Cancel anytime</p>
         </div>
 
@@ -210,24 +217,29 @@ export default function StaffPage() {
 
   return (
     <main className="bg-white text-white">
-      <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-violet-900 py-20 px-5 text-center">
-        <div className="max-w-3xl mx-auto">
-          <span className="inline-block bg-blue-500/20 text-blue-300 text-xs font-bold px-4 py-2 rounded-full mb-6 border border-blue-500/30">
-            🤖 <LiveUserCount /> businesses using PilotStaff right now
-          </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold mb-5 leading-tight">
-            Hire AI Staff that works <span className="text-blue-400">24/7</span>
-          </h1>
-          <p className="text-slate-300 text-lg max-w-xl mx-auto">
-            Build your AI team for sales, support, content, social media and growth. Try every staff member before hiring.
-          </p>
-          <div className="mt-7 flex justify-center gap-3 flex-wrap">
-            <Link href="/dashboard" className="rounded-xl bg-blue-600 hover:bg-blue-700 px-5 py-3 text-sm font-bold">
-              Open Dashboard
-            </Link>
-            <a href="#staff-list" className="rounded-xl border border-white/20 hover:bg-white/10 px-5 py-3 text-sm font-bold">
-              Explore AI Staff
-            </a>
+      <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-violet-900 py-20 px-5">
+        <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-10 items-center">
+          <div className="text-center lg:text-left">
+            <span className="inline-block bg-blue-500/20 text-blue-300 text-xs font-bold px-4 py-2 rounded-full mb-6 border border-blue-500/30">
+              🤖 <LiveUserCount /> businesses using PilotStaff right now
+            </span>
+            <h1 className="text-4xl sm:text-5xl font-extrabold mb-5 leading-tight">
+              Hire AI Staff that works <span className="text-blue-400">24/7</span>
+            </h1>
+            <p className="text-slate-300 text-lg max-w-xl mx-auto lg:mx-0">
+              Build your AI team for sales, support, content, social media and growth. Try every staff member before hiring.
+            </p>
+            <div className="mt-7 flex justify-center lg:justify-start gap-3 flex-wrap">
+              <Link href="/dashboard" className="rounded-xl bg-blue-600 hover:bg-blue-700 px-5 py-3 text-sm font-bold">
+                Open Dashboard
+              </Link>
+              <a href="#staff-list" className="rounded-xl border border-white/20 hover:bg-white/10 px-5 py-3 text-sm font-bold">
+                Explore AI Staff
+              </a>
+            </div>
+          </div>
+          <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+            <img src={aiImage("diverse team of futuristic AI robot employees collaborating around a glowing office table, optimistic illustration", 600, 900)} alt="AI staff team" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
@@ -251,6 +263,11 @@ export default function StaffPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {visibleStaff.map((staff) => (
             <article key={staff.id} className="bg-white rounded-3xl border border-slate-200 overflow-visible shadow-sm">
+              {staff.image && (
+                <div className="aspect-[16/9] w-full overflow-hidden bg-slate-100 rounded-t-3xl">
+                  <img src={staff.image} alt={staff.name} loading="lazy" className="w-full h-full object-cover" />
+                </div>
+              )}
               <div className={`h-2 bg-gradient-to-r ${staff.color}`} />
               <div className="p-6">
                 <div className="flex items-start justify-between gap-3">
