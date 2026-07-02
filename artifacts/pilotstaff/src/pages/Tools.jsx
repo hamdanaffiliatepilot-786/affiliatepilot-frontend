@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
+import { aiImage } from '../lib/genImage';
 
 const TOOL_CATEGORIES = [
   {
@@ -117,6 +118,8 @@ const TOOL_CATEGORIES = [
   },
 ];
 
+const TOOLS_HERO_IMAGE = aiImage('collage of glowing AI tool icons — pen, image, chart, code, megaphone — floating above a workspace, colorful illustration', 700, 900);
+
 function ToolCard({ tool }) {
   return (
     <Link href={`/tools/${tool.slug}`} className="card p-5 group relative">
@@ -150,8 +153,8 @@ export default function Tools() {
   return (
     <div className="min-h-screen bg-white">
       <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/80 via-white to-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-14 relative">
-          <div className="text-center">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-14 relative grid lg:grid-cols-2 gap-10 items-center">
+          <div className="text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-sm font-semibold mb-6">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse-dot"></span>
               {totalTools}+ Tools — 100% Free — No Login
@@ -159,18 +162,21 @@ export default function Tools() {
             <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
               Free AI Tools for <span className="gradient-text">Every Task</span>
             </h1>
-            <p className="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-slate-500 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
               Humanize text, build websites, write blogs, generate images, create logos, audit SEO, write scripts, plan projects, and more — in seconds.
             </p>
+            <div className="max-w-xl mx-auto lg:mx-0 mt-10">
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search tools..."
+                className="w-full bg-white border border-slate-200 px-5 py-3.5 rounded-2xl text-sm outline-none focus:border-blue-500 shadow-sm"
+              />
+            </div>
           </div>
-          <div className="max-w-xl mx-auto mt-10">
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search tools..."
-              className="w-full bg-white border border-slate-200 px-5 py-3.5 rounded-2xl text-sm outline-none focus:border-blue-500 shadow-sm"
-            />
+          <div className="rounded-3xl overflow-hidden shadow-2xl border border-slate-200 hidden lg:block">
+            <img src={TOOLS_HERO_IMAGE} alt="AI tools" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
