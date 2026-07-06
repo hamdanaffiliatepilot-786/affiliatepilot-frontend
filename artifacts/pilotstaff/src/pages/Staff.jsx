@@ -219,7 +219,7 @@ export default function StaffPage() {
     <main className="bg-white text-white">
       <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-violet-900 py-20 px-5">
         <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-10 items-center">
-          <div className="text-center lg:text-left">
+          <div className="text-center lg:text-left animate-fade-up">
             <span className="inline-block bg-blue-500/20 text-blue-300 text-xs font-bold px-4 py-2 rounded-full mb-6 border border-blue-500/30">
               🤖 <LiveUserCount /> businesses using PilotStaff right now
             </span>
@@ -230,15 +230,15 @@ export default function StaffPage() {
               Build your AI team for sales, support, content, social media and growth. Try every staff member before hiring.
             </p>
             <div className="mt-7 flex justify-center lg:justify-start gap-3 flex-wrap">
-              <Link href="/dashboard" className="rounded-xl bg-blue-600 hover:bg-blue-700 px-5 py-3 text-sm font-bold">
+              <Link href="/dashboard" className="rounded-xl bg-blue-600 hover:bg-blue-700 px-5 py-3 text-sm font-bold transition-all hover:scale-105">
                 Open Dashboard
               </Link>
-              <a href="#staff-list" className="rounded-xl border border-white/20 hover:bg-white/10 px-5 py-3 text-sm font-bold">
+              <a href="#staff-list" className="rounded-xl border border-white/20 hover:bg-white/10 px-5 py-3 text-sm font-bold transition-all hover:scale-105">
                 Explore AI Staff
               </a>
             </div>
           </div>
-          <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+          <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl animate-scale-in" style={{ animationDelay: '150ms' }}>
             <img src={aiImage("diverse team of futuristic AI robot employees collaborating around a glowing office table, optimistic illustration", 600, 900)} alt="AI staff team" className="w-full h-full object-cover" />
           </div>
         </div>
@@ -261,8 +261,8 @@ export default function StaffPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {visibleStaff.map((staff) => (
-            <article key={staff.id} className="bg-white rounded-3xl border border-slate-200 overflow-visible shadow-sm">
+          {visibleStaff.map((staff, i) => (
+            <article key={staff.id} className="bg-white rounded-3xl border border-slate-200 overflow-visible shadow-sm animate-fade-up hover:-translate-y-1 hover:shadow-lg transition-all duration-200" style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}>
               {staff.image && (
                 <div className="aspect-[16/9] w-full overflow-hidden bg-slate-100 rounded-t-3xl">
                   <img src={staff.image} alt={staff.name} loading="lazy" className="w-full h-full object-cover" />
