@@ -70,7 +70,7 @@ function HeroSection() {
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-violet-200/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 relative">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="text-center lg:text-left">
+          <div className="text-center lg:text-left animate-fade-up">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold mb-8">
               <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse-dot"></span>
               77+ Free AI Tools — No Login Required
@@ -82,24 +82,24 @@ function HeroSection() {
               Stop paying $5,000/month for freelancers. AI employees work 24/7, never sleep, and cost a fraction of the price.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
-              <Link href="/staff" className="btn-primary px-8 py-4 rounded-2xl text-lg inline-flex items-center justify-center gap-2">
+              <Link href="/staff" className="btn-primary px-8 py-4 rounded-2xl text-lg inline-flex items-center justify-center gap-2 hover:scale-[1.03] transition-transform">
                 Hire AI Staff →
               </Link>
-              <Link href="/tools" className="btn-outline px-8 py-4 rounded-2xl text-lg inline-flex items-center justify-center gap-2">
+              <Link href="/tools" className="btn-outline px-8 py-4 rounded-2xl text-lg inline-flex items-center justify-center gap-2 hover:scale-[1.03] transition-transform">
                 Try Free Tools
               </Link>
             </div>
             <p className="text-sm text-slate-400">No credit card · Free forever plan · Cancel anytime</p>
           </div>
-          <div className="relative">
+          <div className="relative animate-scale-in" style={{ animationDelay: '150ms' }}>
             <div className="rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
               <img src={HERO_IMAGE} alt="AI employees working for your business" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto mt-16">
-          {STATS.map(s => (
-            <div key={s.label} className="text-center bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          {STATS.map((s, i) => (
+            <div key={s.label} className="text-center bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200 animate-fade-up" style={{ animationDelay: `${200 + i * 80}ms` }}>
               <p className="text-2xl sm:text-3xl font-extrabold text-slate-900">{s.value}</p>
               <p className="text-xs text-slate-500 mt-1">{s.label}</p>
             </div>
