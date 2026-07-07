@@ -9,8 +9,8 @@ export default function FreeToolsSection({ tools }) {
         <p className="text-slate-500 text-lg max-w-2xl mx-auto">No signup required. Each tool solves a real business problem.</p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tools.map(tool => (
-          <Link key={tool.slug} href={`/tools/${tool.slug}`} className="card overflow-hidden group relative flex flex-col">
+        {tools.map((tool, i) => (
+          <Link key={tool.slug} href={`/tools/${tool.slug}`} className="card overflow-hidden group relative flex flex-col animate-fade-up" style={{ animationDelay: `${i * 50}ms` }}>
             {tool.badge && (
               <span className={`absolute top-4 right-4 z-10 badge text-[10px] ${
                 tool.badge === 'Popular' ? 'bg-blue-100 text-blue-700' :
