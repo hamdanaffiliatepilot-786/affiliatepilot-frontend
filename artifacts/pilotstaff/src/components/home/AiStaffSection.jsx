@@ -10,8 +10,8 @@ export default function AiStaffSection({ staff }) {
           <p className="text-slate-500 text-lg max-w-2xl mx-auto">Each replaces a $2,000–$5,000/month human employee.</p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {staff.map(agent => (
-            <div key={agent.name} className={`bg-white rounded-2xl overflow-hidden border hover:shadow-lg transition-all ${agent.premium ? 'border-violet-200 relative' : 'border-slate-200 hover:border-slate-300'}`}>
+          {staff.map((agent, i) => (
+            <div key={agent.name} className={`bg-white rounded-2xl overflow-hidden border hover:shadow-lg hover:-translate-y-1 transition-all duration-200 animate-fade-up ${agent.premium ? 'border-violet-200 relative' : 'border-slate-200 hover:border-slate-300'}`} style={{ animationDelay: `${i * 60}ms` }}>
               {agent.premium && <span className="absolute top-3 right-3 z-10 bg-violet-600 text-white text-[10px] font-bold px-3 py-1 rounded-full">PREMIUM</span>}
               {agent.image && (
                 <div className="aspect-[16/9] w-full overflow-hidden bg-slate-100">
